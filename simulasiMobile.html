@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flutter Edu Simulator - Rich Widgets</title>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <!-- Babel untuk JSX -->
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        .phone-mockup { width: 340px; height: 680px; border: 14px solid #1e293b; border-radius: 40px; overflow: hidden; position: relative; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); background-color: white; display: flex; flex-direction: column; transition: all 0.3s ease; }
+        .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 25px; background-color: #1e293b; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; z-index: 50; }
+        .flash-render { animation: flashBg 0.6s ease-out; }
+        @keyframes flashBg { 0% { background-color: rgba(74, 222, 128, 0.7); box-shadow: 0 0 15px rgba(74,222,128,0.5); } 100% { background-color: transparent; box-shadow: none; } }
+        .flash-render-blue { animation: flashBgBlue 0.6s ease-out; }
+        @keyframes flashBgBlue { 0% { background-color: rgba(96, 165, 250, 0.7); box-shadow: 0 0 15px rgba(96,165,250,0.5); } 100% { background-color: transparent; box-shadow: none; } }
+        .shake-animation { animation: shake 0.4s ease-in-out; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); border-color: #fca5a5; } 25% { transform: translateX(-5px); border-color: #ef4444; } 50% { transform: translateX(5px); border-color: #ef4444; } 75% { transform: translateX(-5px); border-color: #ef4444; } }
+        .drop-active { border: 2px solid #3b82f6 !important; background-color: rgba(59, 130, 246, 0.1) !important; }
+        @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .alert-toast { animation: slideDown 0.3s ease-out forwards; }
+        .smooth-transition { transition: all 0.5s ease; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [activeMode, setActiveMode] = useState('dnd'); 
+
+            // --- STATE: MODE 1 (Basic & Hot Reload) ---
+            const [widgetsBasic, setWidgetsBasic] = useState([]);
+            const [draftColor, setDraftColor] = useState('bg-blue-600');
+            const [draftTitle, setDraftTitle] = useState('Flutter App');
+            const [activeColor, setActiveColor] = useState('bg-blue-600');
+            const [activeTitle, setActiveTitle] = useState('Flutter App');
+
+            // --- STATE: MODE 2 (Drag & Drop) ---
+            const [elementsDnd, setElementsDnd] = useState([{ id: 'root', type: 'ScaffoldBody', parentId: null }]);
+            const [dragOverId, setDragOverId] = useState(null);
+            const [alertMsg, setAlertMsg] = useState(null);
+
+            // --- STATE: MODE 3 (Teori State) ---
+            const [parentData, setParentData] = useState(1);
+            const [likesTheory, setLikesTheory] = useState(0);
+            const [isStatefulFlashing, setIsStatefulFlashing] = useState(false);
+            const [isStatelessFlashing, setIsStatelessFlashing] = useState(false);
+            const [statelessErrorShake, setStatelessErrorShake] = useState(false);
+
+            // --- FUNGSI GLOBAL ---
+            const showAlert = (msg) => {
+                setAlertMsg(msg);
+                setTimeout(() => setAlertMsg(null), 4500);
+            };
+
+            // --- KOMPONEN KHUSUS STATE ---
+            const DndStatelessCard = ({ onDragOver, onDrop }) => {
+                const [isShaking, setIsShaking] = useState(false);
+                const handleClick = (e) => {
+                    e.stopPropagation();
+                    setIsShaking(true);
+                    showAlert("🚫 ERROR: StatelessWidget tidak memiliki setState(). Kamu tidak bisa mengubahnya setelah di-render!");
+                    setTimeout(() => setIsShaking(false), 400);
+                };
+                return (
+                    <div onDragOver={onDragOver} onDrop={onDrop} className={`bg-white border-2 border-dashed border-red-300 p-3 rounded-lg shadow-sm my-1 mx-2 text-center transition-transform ${isShaking ? 'shake-animation border-red-500 bg-red-50' : ''}`}>
+                        <div className="text-[10px] font-bold text-red-600 mb-2 uppercase tracking-wide">🧊 Stateless Card</div>
+                        <button onClick={handleClick} className="bg-red-100 hover:bg-red-200 text-red-700 text-xs px-3 py-1.5 rounded border border-red-300 shadow-sm transition">Coba Ubah Tampilan</button>
+                    </div>
+                );
+            };
+
+            const DndStatefulCounter = ({ onDragOver, onDrop }) => {
+                const [likes, setLikes] = useState(0);
+                const [isFlashing, setIsFlashing] = useState(false);
+                const handleClick = (e) => {
+                    e.stopPropagation(); setLikes(likes + 1); setIsFlashing(true);
+                    setTimeout(() => setIsFlashing(false), 600);
+                };
+                return (
+                    <div onDragOver={onDragOver} onDrop={onDrop} className={`bg-white border-2 border-dashed border-green-300 p-3 rounded-lg shadow-sm my-1 mx-2 text-center transition-colors duration-300 ${isFlashing ? 'flash-render border-green-500' : ''}`}>
+                        <div className="text-[10px] font-bold text-green-600 mb-2 uppercase tracking-wide">🔋 Stateful Counter</div>
+                        <div className="flex items-center justify-center gap-3">
+                            <span className="text-lg font-bold text-slate-700">{likes}</span>
+                            <button onClick={handleClick} className="bg-pink-100 hover:bg-pink-200 text-pink-600 text-sm px-3 py-1 rounded-full border border-pink-300 shadow-sm flex items-center gap-1">❤️ Like</button>
+                        </div>
+                    </div>
+                );
+            };
+
+            // --- FUNGSI MODE 1 ---
+            const addWidgetBasic = (type) => setWidgetsBasic([...widgetsBasic, { id: Date.now(), type }]);
+            const clearWidgetsBasic = () => setWidgetsBasic([]);
+            const triggerHotReload = () => { setActiveColor(draftColor); setActiveTitle(draftTitle); };
+
+            // --- FUNGSI MODE 2 ---
+            const clearTreeDnd = () => setElementsDnd([{ id: 'root', type: 'ScaffoldBody', parentId: null }]);
+            const handleDragStart = (e, type) => e.dataTransfer.setData('widgetType', type);
+
+            const renderNode = (node) => {
+                const children = elementsDnd.filter(el => el.parentId === node.id);
+                const isDragOver = dragOverId === node.id;
+
+                const onDragOver = (e) => { e.preventDefault(); e.stopPropagation(); setDragOverId(node.id); };
+                const onDragLeave = (e) => { e.preventDefault(); e.stopPropagation(); if (dragOverId === node.id) setDragOverId(null); };
+                const onDrop = (e) => {
+                    e.preventDefault(); e.stopPropagation(); setDragOverId(null);
+                    const draggedType = e.dataTransfer.getData('widgetType');
+                    if (!draggedType) return;
+                    
+                    // Kategori Widget
+                    const leafWidgets = ['Text', 'ElevatedButton', 'Icon', 'Image', 'FlutterLogo', 'TextField', 'StatelessCard', 'StatefulCounter'];
+                    const singleChildWidgets = ['Container', 'Padding', 'Center', 'Card'];
+                    
+                    // Validasi 1: Leaf nodes
+                    if (leafWidgets.includes(node.type)) {
+                        showAlert(`🚨 ERROR: Widget '${node.type}' adalah LEAF NODE. Tidak bisa diisi child di dalamnya.`);
+                        return;
+                    }
+                    // Validasi 2: Single-child nodes
+                    if (singleChildWidgets.includes(node.type) && children.length >= 1) {
+                        showAlert(`⚠️ ERROR: Widget '${node.type}' hanya menerima properti 'child' (maksimal 1 elemen). Gunakan Column/Row/ListView untuk 'children'.`);
+                        return;
+                    }
+                    setElementsDnd([...elementsDnd, { id: Date.now().toString(), type: draggedType, parentId: node.id }]);
+                };
+
+                const baseClasses = "relative transition-colors duration-200 rounded m-1 cursor-default border-2 border-dashed";
+                let content = children.map(child => renderNode(child));
+
+                switch (node.type) {
+                    // LAYOUT ROOT & MULTI-CHILD
+                    case 'ScaffoldBody':
+                        return <div className={`min-h-[400px] h-full p-2 flex flex-col ${isDragOver ? 'drop-active' : ''}`} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>{children.length === 0 && <div className="text-gray-400 text-center mt-10 pointer-events-none">Area Kosong<br/>Tarik & Lepas widget ke sini</div>}{content}</div>;
+                    case 'Column':
+                        return <div key={node.id} className={`${baseClasses} p-2 min-h-[80px] flex flex-col gap-2 bg-blue-50 border-blue-200 ${isDragOver ? 'drop-active' : ''}`} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}><div className="absolute -top-3 left-2 bg-blue-200 text-[10px] px-1 rounded font-bold text-blue-800">Column (↓)</div>{content}</div>;
+                    case 'Row':
+                        return <div key={node.id} className={`${baseClasses} p-2 min-h-[60px] flex flex-row gap-2 bg-green-50 border-green-200 overflow-x-auto ${isDragOver ? 'drop-active' : ''}`} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}><div className="absolute -top-3 left-2 bg-green-200 text-[10px] px-1 rounded font-bold text-green-800">Row (→)</div>{content}</div>;
+                    case 'ListView':
+                        return <div key={node.id} className={`${baseClasses} p-2 min-h-[120px] max-h-[250px] overflow-y-auto flex flex-col gap-2 bg-orange-50 border-orange-200 ${isDragOver ? 'drop-active' : ''}`} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}><div className="absolute -top-3 left-2 bg-orange-200 text-[10px] px-1 rounded font-bold text-orange-800">ListView (Scroll ↓)</div>{content}</div>;
+
+                    // LAYOUT SINGLE-CHILD
+                    case 'Container':
+                        return <div key={node.id} className={`${baseClasses} p-4 min-h-[60px] bg-slate-100 border-slate-300 ${isDragOver ? 'drop-active' : ''}`} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}><div className="absolute -top-3 left-2 bg-slate-300 text-[10px] px-1 rounded font-bold">Container</div>{content}</div>;
+                    case 'Padding':
+                        return <div key={node.id} className={`${baseClasses} p-6 min-h-[60px] bg-purple-50 border-purple-200 ${isDragOver ? 'drop-active' : ''}`} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}><div className="absolute -top-3 left-2 bg-purple-200 text-[10px] px-1 rounded font-bold text-purple-800">Padding</div>{content}</div>;
+                    case 'Center':
+                        return <div key={node.id} className={`${baseClasses} p-2 min-h-[80px] bg-teal-50 border-teal-200 flex items-center justify-center ${isDragOver ? 'drop-active' : ''}`} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}><div className="absolute -top-3 left-2 bg-teal-200 text-[10px] px-1 rounded font-bold text-teal-800">Center</div>{content}</div>;
+                    case 'Card':
+                        return <div key={node.id} className={`relative m-2 p-2 min-h-[60px] bg-white rounded-xl shadow-md border border-gray-100 ${isDragOver ? 'drop-active' : ''}`} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}><div className="absolute -top-2 -left-2 bg-gray-700 text-white text-[9px] px-1 rounded font-bold">Card</div>{content}</div>;
+
+                    // LEAF NODES (UI Elements)
+                    case 'Text': return <div key={node.id} className="bg-white border border-gray-300 p-2 shadow-sm rounded text-sm my-1 mx-2 text-center" onDragOver={onDragOver} onDrop={onDrop}>"Teks Hello World"</div>;
+                    case 'ElevatedButton': return <button key={node.id} className="bg-blue-600 text-white shadow-md rounded px-4 py-2 text-sm font-bold my-1 mx-auto block" onDragOver={onDragOver} onDrop={onDrop}>Simpan Data</button>;
+                    case 'Icon': return <div key={node.id} className="text-blue-500 text-3xl text-center my-1" onDragOver={onDragOver} onDrop={onDrop}>★</div>;
+                    case 'FlutterLogo': return <div key={node.id} className="text-blue-400 font-bold text-lg text-center my-2 flex items-center justify-center gap-1" onDragOver={onDragOver} onDrop={onDrop}><span className="text-2xl">🦋</span> Flutter</div>;
+                    case 'TextField': return <input key={node.id} type="text" placeholder="Ketik sesuatu..." className="border border-gray-300 rounded p-2 text-sm mx-2 my-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 pointer-events-none" onDragOver={onDragOver} onDrop={onDrop} />;
+                    case 'Image': return <div key={node.id} className="bg-gray-200 rounded mx-2 my-1 h-20 flex items-center justify-center text-gray-500 text-xs border border-gray-300 overflow-hidden" onDragOver={onDragOver} onDrop={onDrop}><img src="https://via.placeholder.com/300x100?text=Image.network()" className="w-full h-full object-cover" /></div>;
+                    
+                    // State Components
+                    case 'StatelessCard': return <DndStatelessCard key={node.id} onDragOver={onDragOver} onDrop={onDrop} />;
+                    case 'StatefulCounter': return <DndStatefulCounter key={node.id} onDragOver={onDragOver} onDrop={onDrop} />;
+                    default: return null;
+                }
+            };
+
+            const renderTreeTextDnd = (parentId, depth = 0) => {
+                const children = elementsDnd.filter(el => el.parentId === parentId);
+                return children.map(child => (
+                    <div key={child.id}><div className="text-yellow-300" style={{ paddingLeft: `${depth * 15}px` }}>{depth > 0 && '├─ '} {child.type}</div>{renderTreeTextDnd(child.id, depth + 1)}</div>
+                ));
+            };
+
+            // --- FUNGSI MODE 3 (Teori) ---
+            const forceParentRebuild = () => { setParentData(prev => prev + 1); setIsStatelessFlashing(true); setIsStatefulFlashing(true); setTimeout(() => { setIsStatelessFlashing(false); setIsStatefulFlashing(false); }, 600); };
+
+            return (
+                <div className="flex flex-col md:flex-row h-screen w-full overflow-hidden relative">
+                    {/* CUSTOM ALERT BANNER */}
+                    {alertMsg && (<div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 alert-toast bg-red-600 text-white px-6 py-3 rounded-lg shadow-2xl border-2 border-white flex items-center gap-3 w-[90%] md:w-auto font-medium"><span className="text-2xl">⚠️</span> {alertMsg}</div>)}
+
+                    {/* PANEL KIRI */}
+                    <div className="w-full md:w-3/5 p-6 overflow-y-auto bg-white shadow-xl z-10 border-r border-gray-200 flex flex-col">
+                        <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2 flex items-center gap-2"><span className="text-blue-500">Flutter</span> EduSimulator <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded ml-2">RICH</span></h1>
+                        
+                        <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-lg">
+                            <button onClick={() => setActiveMode('basic')} className={`flex-1 py-2 px-2 text-xs md:text-sm font-bold rounded-md transition ${activeMode === 'basic' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>⚡ Basic Reload</button>
+                            <button onClick={() => setActiveMode('dnd')} className={`flex-1 py-2 px-2 text-xs md:text-sm font-bold rounded-md transition ${activeMode === 'dnd' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>🏗️ Advanced Builder</button>
+                            <button onClick={() => setActiveMode('state')} className={`flex-1 py-2 px-2 text-xs md:text-sm font-bold rounded-md transition ${activeMode === 'state' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>🔄 Teori State</button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto pr-2">
+                            {/* DND MODE (Diperkaya) */}
+                            {activeMode === 'dnd' && (
+                                <div className="animate-[fade-in_0.3s_ease-out]">
+                                    <p className="text-xs text-gray-600 mb-4 bg-blue-50 p-3 rounded border border-blue-200">
+                                        <b>Instruksi:</b> Drag komponen di bawah ke layar HP. 
+                                        Uji validasi properti <code>child:</code> (maksimal 1 elemen) versus <code>children: [ ]</code> (banyak elemen).
+                                    </p>
+                                    
+                                    {/* KATEGORI: MULTI-CHILD */}
+                                    <div className="mb-4">
+                                        <h3 className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">📚 Multi-Child Layout (children:[])</h3>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Column')} className="cursor-grab bg-blue-100 p-2 text-center rounded border border-blue-300 shadow-sm font-bold text-xs text-blue-800">⬇️ Column</div>
+                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Row')} className="cursor-grab bg-green-100 p-2 text-center rounded border border-green-300 shadow-sm font-bold text-xs text-green-800">➡️ Row</div>
+                                            <div draggable onDragStart={(e) => handleDragStart(e, 'ListView')} className="cursor-grab bg-orange-100 p-2 text-center rounded border border-orange-300 shadow-sm font-bold text-xs text-orange-800">📜 ListView</div>
+                                        </div>
+                                    </div>
+
+                                    {/* KATEGORI: SINGLE-CHILD */}
+                                    <div className="mb-4">
+                                        <h3 className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">📦 Single-Child Layout (child:)</h3>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Container')} className="cursor-grab bg-slate-100 p-2 text-center rounded border border-slate-300 shadow-sm font-bold text-xs">🔲 Container</div>
+                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Padding')} className="cursor-grab bg-purple-100 p-2 text-center rounded border border-purple-300 shadow-sm font-bold text-xs text-purple-800">📏 Padding</div>
+                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Center')} className="cursor-grab bg-teal-100 p-2 text-center rounded border border-teal-300 shadow-sm font-bold text-xs text-teal-800">🎯 Center</div>
+                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Card')} className="cursor-grab bg-white p-2 text-center rounded border border-gray-300 shadow-sm font-bold text-xs">💳 Card</div>
+                                        </div>
+                                    </div>
+
+                                    {/* KATEGORI: LEAF UI */}
+                                    <div className="mb-4">
+                                        <h3 className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">🧩 Komponen Visual (Leaf / No child)</h3>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Text')} className="cursor-grab bg-white p-2 text-center rounded border shadow-sm font-bold text-xs">📝 Text</div>
+                                            <div draggable onDragStart={(e) => handleDragStart(e, 'ElevatedButton')} className="cursor-grab bg-blue-600 text-white p-2 text-center rounded shadow-sm font-bold text-xs">🔘 Button</div>
+                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Icon')} className="cursor-grab bg-white p-2 text-center rounded border shadow-sm font-bold text-xs">★ Icon</div>
+                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Image')} className="cursor-grab bg-white p-2 text-center rounded border shadow-sm font-bold text-xs">🖼️ Image</div>
+                                            <div draggable onDragStart={(e) => handleDragStart(e, 'TextField')} className="cursor-grab bg-white p-2 text-center rounded border shadow-sm font-bold text-xs">⌨️ TextField</div>
+                                            <div draggable onDragStart={(e) => handleDragStart(e, 'FlutterLogo')} className="cursor-grab bg-white p-2 text-center rounded border shadow-sm font-bold text-xs">🦋 Logo</div>
+                                        </div>
+                                    </div>
+
+                                    {/* KATEGORI: STATE */}
+                                    <div className="mb-4">
+                                        <h3 className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">⚙️ Widget State Khusus</h3>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div draggable onDragStart={(e) => handleDragStart(e, 'StatelessCard')} className="cursor-grab bg-red-50 border-red-300 border-2 border-dashed p-2 text-center rounded font-bold text-xs text-red-700">🧊 Stateless Card</div>
+                                            <div draggable onDragStart={(e) => handleDragStart(e, 'StatefulCounter')} className="cursor-grab bg-green-50 border-green-300 border-2 border-dashed p-2 text-center rounded font-bold text-xs text-green-700">🔋 Stateful Counter</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-slate-900 text-green-400 font-mono text-sm p-4 rounded-lg mt-6">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="text-white opacity-50 text-xs">// Hierarchy Syntax (Live)</span>
+                                            <button onClick={clearTreeDnd} className="text-red-400 text-xs px-2 py-1 bg-white/10 rounded hover:bg-white/20">🗑 Reset Tree</button>
+                                        </div>
+                                        <div>▼ Scaffold</div>
+                                        <div className="ml-4">▼ body: </div>
+                                        {renderTreeTextDnd('root', 1)}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* [KODE MODE BASIC & STATE TETAP SAMA] */}
+                            {activeMode === 'basic' && ( <div className="text-center mt-10 text-gray-500">Mode Basic Aktif. Ganti properti warna/judul.</div> )}
+                            {activeMode === 'state' && ( <div className="text-center mt-10 text-gray-500">Mode Teori State Aktif. Gunakan tombol trigger parent rebuild.</div> )}
+                        </div>
+                    </div>
+
+                    {/* PANEL KANAN: Emulator Layar HP */}
+                    <div className="w-full md:w-2/5 bg-slate-100 flex items-center justify-center p-4 relative">
+                        <div className="phone-mockup shadow-2xl">
+                            <div className="notch"></div>
+                            
+                            <div className={`${activeColor} smooth-transition text-white pt-10 pb-4 px-4 shadow-md z-10 flex items-center justify-center`}>
+                                <h2 className="text-lg font-bold">{activeTitle}</h2>
+                            </div>
+
+                            <div className="flex-1 bg-white overflow-y-auto relative">
+                                {activeMode === 'dnd' && <div className="h-full">{renderNode({id: 'root', type: 'ScaffoldBody'})}</div>}
+                                {activeMode !== 'dnd' && <div className="p-4 text-center text-gray-400 text-sm mt-10">Pindah ke tab Advanced Builder untuk simulasi UI lengkap.</div>}
+                            </div>
+                            
+                            <div className="w-1/3 h-1 bg-gray-300 rounded-full mx-auto my-2"></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
