@@ -228,6 +228,21 @@
                 setSelectedExamLevel(null);
                 setExamError('');
             };
+            const exitExam = () => {
+                if (examLoading) return;
+                if (examStatus === 'inProgress' && !window.confirm('Keluar dari asesmen? Jawaban yang belum dikumpulkan akan hilang.')) return;
+                setExamStatus('locked');
+                setExamDialogOpen(false);
+                setExamNis('');
+                setExamParticipant(null);
+                setExamLevels([]);
+                setExamQuestions([]);
+                setExamAnswers({});
+                setExamResult(null);
+                setSelectedExamLevel(null);
+                setExamError('');
+                setActiveMode('basic');
+            };
             const openExam = () => {
                 setActiveMode('exam');
                 if (examStatus === 'locked') {
@@ -460,18 +475,21 @@ class _CounterPageState extends State<CounterPage> {
                     <div className="w-full md:w-3/5 p-4 md:p-6 md:overflow-y-auto bg-white shadow-xl z-10 border-r border-gray-200 flex flex-col">
                         <div className="flex items-start justify-between gap-3 mb-2">
                             <h1 className="min-w-0 text-xl md:text-3xl font-bold text-slate-800 flex flex-wrap items-center gap-2"><span className="text-blue-500">Flutter</span> EduSimulator <span className="bg-blue-600 text-white text-[10px] px-2 py-1 rounded">LAB PEMULA</span></h1>
-                            <button onClick={openExam} className="group relative shrink-0 overflow-hidden rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2.5 font-bold text-white shadow-lg shadow-indigo-300/60 transition hover:-translate-y-0.5 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-indigo-200">
+                            <button onClick={examParticipant ? exitExam : openExam} disabled={examLoading} className="group relative shrink-0 overflow-hidden rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2.5 font-bold text-white shadow-lg shadow-indigo-300/60 transition hover:-translate-y-0.5 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:opacity-60">
                                 <span className="absolute inset-0 bg-white/10 opacity-0 transition group-hover:opacity-100"></span>
-                                <span className="relative flex items-center gap-1.5 whitespace-nowrap"><span aria-hidden="true">✦</span> Mulai Ujian</span>
+                                <span className="relative flex items-center gap-1.5 whitespace-nowrap"><span aria-hidden="true">{examParticipant ? '↩' : '✦'}</span> {examParticipant ? 'Keluar Asesmen' : 'Mulai Ujian'}</span>
                             </button>
                         </div>
-                        <p className="text-sm text-slate-600 mb-4">Belajar bertahap: ubah properti, susun widget, pahami state, lalu jalankan aplikasi Flutter pertamamu.</p>
-                        
-                        <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-lg">
-                            <button onClick={() => setActiveMode('basic')} className={`flex-1 py-2 px-2 text-xs md:text-sm font-bold rounded-md transition ${activeMode === 'basic' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>1. Dasar</button>
-                            <button onClick={() => setActiveMode('dnd')} className={`flex-1 py-2 px-2 text-xs md:text-sm font-bold rounded-md transition ${activeMode === 'dnd' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>2. Susun UI</button>
-                            <button onClick={() => setActiveMode('state')} className={`flex-1 py-2 px-2 text-xs md:text-sm font-bold rounded-md transition ${activeMode === 'state' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>3. State</button>
-                        </div>
+                        {!examParticipant && (
+                            <div>
+                                <p className="text-sm text-slate-600 mb-4">Belajar bertahap: ubah properti, susun widget, pahami state, lalu jalankan aplikasi Flutter pertamamu.</p>
+                                <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-lg">
+                                    <button onClick={() => setActiveMode('basic')} className={`flex-1 py-2 px-2 text-xs md:text-sm font-bold rounded-md transition ${activeMode === 'basic' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>1. Dasar</button>
+                                    <button onClick={() => setActiveMode('dnd')} className={`flex-1 py-2 px-2 text-xs md:text-sm font-bold rounded-md transition ${activeMode === 'dnd' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>2. Susun UI</button>
+                                    <button onClick={() => setActiveMode('state')} className={`flex-1 py-2 px-2 text-xs md:text-sm font-bold rounded-md transition ${activeMode === 'state' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>3. State</button>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="flex-1 overflow-y-auto pr-2">
                             {/* DND MODE (Diperkaya) */}
