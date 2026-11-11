@@ -34,6 +34,10 @@
 
     <script type="text/babel">
         const { useState } = React;
+        const DEFAULT_EXAM_ENDPOINT = 'https://script.google.com/a/macros/smkwikrama.sch.id/s/AKfycbyzFs7nEeYNk_O6LaVZD6k9ht4JRJDU2NuQ7tF444zY-PfTiTsiybRMWehEi8wqhNCx/exec';
+        const isAppsScriptEndpoint = (url) => url.protocol === 'https:'
+            && url.hostname === 'script.google.com'
+            && /^\/(?:a\/)?macros\/(?:s\/[^/]+|[^/]+\/s\/[^/]+)\/exec$/.test(url.pathname);
 
         const DndStatelessCard = ({ onDragOver, onDrop, showAlert }) => {
             const [isShaking, setIsShaking] = useState(false);
@@ -95,12 +99,12 @@
 
             // --- STATE: UJIAN ---
             const [examEndpoint, setExamEndpoint] = useState(() => {
-                try { return localStorage.getItem('flutterExamEndpoint') || ''; }
-                catch (error) { return ''; }
+                try { return localStorage.getItem('flutterExamEndpoint') || DEFAULT_EXAM_ENDPOINT; }
+                catch (error) { return DEFAULT_EXAM_ENDPOINT; }
             });
             const [examEndpointDraft, setExamEndpointDraft] = useState(() => {
-                try { return localStorage.getItem('flutterExamEndpoint') || ''; }
-                catch (error) { return ''; }
+                try { return localStorage.getItem('flutterExamEndpoint') || DEFAULT_EXAM_ENDPOINT; }
+                catch (error) { return DEFAULT_EXAM_ENDPOINT; }
             });
             const [examNis, setExamNis] = useState('');
             const [examQuestions, setExamQuestions] = useState([]);
@@ -124,7 +128,7 @@
                     reject(new Error('Alamat backend belum diatur. Buka Pengaturan koneksi Google Sheets.'));
                     return;
                 }
-                if (endpoint.protocol !== 'https:' || endpoint.hostname !== 'script.google.com' || !/^\/macros\/s\/[^/]+\/exec$/.test(endpoint.pathname)) {
+                if (!isAppsScriptEndpoint(endpoint)) {
                     reject(new Error('Alamat backend harus berupa URL web app Google Apps Script yang berakhiran /exec.'));
                     return;
                 }
@@ -157,7 +161,7 @@
             const saveExamEndpoint = () => {
                 try {
                     const endpoint = new URL(examEndpointDraft.trim());
-                    if (endpoint.protocol !== 'https:' || endpoint.hostname !== 'script.google.com' || !/^\/macros\/s\/[^/]+\/exec$/.test(endpoint.pathname)) {
+                    if (!isAppsScriptEndpoint(endpoint)) {
                         throw new Error('Gunakan URL web app Google Apps Script yang berakhiran /exec.');
                     }
                     localStorage.setItem('flutterExamEndpoint', endpoint.toString());
@@ -596,11 +600,11 @@ class _CounterPageState extends State<CounterPage> {
                                     </div>
                                     <details className="bg-slate-50 border rounded-lg p-4">
                                         <summary className="cursor-pointer font-bold text-sm">Pengaturan koneksi Google Sheets (pengajar)</summary>
-                                        <p className="text-xs text-gray-600 mt-3">Tempel URL web app dari Google Apps Script, lalu simpan. URL hanya disimpan di browser ini. Spreadsheet harus memiliki tab <code>Peserta</code> dengan header di baris pertama dan NIS di kolom A.</p>
+                                        <p className="text-xs text-gray-600 mt-3">URL Apps Script sudah diatur sebagai koneksi bawaan untuk seluruh pengunjung situs. Ubah hanya jika URL deployment berganti. Spreadsheet harus memiliki tab <code>Peserta</code> dengan header di baris pertama dan NIS di kolom A.</p>
                                         <label className="block text-xs font-medium mt-3">URL web app Apps Script
                                             <input value={examEndpointDraft} onChange={(event) => setExamEndpointDraft(event.target.value)} placeholder="https://script.google.com/macros/s/.../exec" className="mt-1 w-full border rounded p-2 text-sm" />
                                         </label>
-                                        <button onClick={saveExamEndpoint} className="mt-2 rounded bg-slate-800 text-white px-3 py-2 text-xs font-bold hover:bg-slate-700">Simpan koneksi</button>
+                                        <button onClick={saveExamEndpoint} className="mt-2 rounded bg-slate-800 text-white px-3 py-2 text-xs font-bold hover:bg-slate-700">Simpan URL di browser ini</button>
                                         <ol className="list-decimal ml-5 mt-3 space-y-1 text-xs text-gray-600">
                                             <li>Di Google Sheets, pastikan tab <code>Peserta</code> memiliki header di baris pertama dan daftar NIS berformat teks di kolom A.</li>
                                             <li>Pilih <b>Ekstensi → Apps Script</b>, ganti isi editor dengan kode di <code>GoogleAppsScript.gs</code>, lalu simpan.</li>
