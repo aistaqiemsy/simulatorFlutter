@@ -1,6 +1,7 @@
 const EXAM_CONFIG = {
   participantSheet: 'Peserta',
   resultSheet: 'Hasil_Ujian',
+  summarySheet: 'Ringkasan_Nilai',
   nisColumn: 1,
   nameColumn: 2,
   rayonColumn: 3,
@@ -221,16 +222,19 @@ function saveExamResult_(nis, parameters) {
 
     const attemptNumber = sheet.getLastRow();
     const row = attemptNumber + 1;
-    sheet.getRange(row, 1, 1, 7).setNumberFormat('@');
+    sheet.getRange(row, 1, 1, 3).setNumberFormat('@');
+    sheet.getRange(row, 4, 1, 3).setNumberFormat('0');
+    sheet.getRange(row, 7, 1, 1).setNumberFormat('@');
     sheet.getRange(row, 1, 1, 7).setValues([[
       String(attemptNumber),
       new Date().toISOString(),
       nis,
-      String(Math.round((correct / total) * 100)),
-      String(correct),
-      String(total),
+      Math.round((correct / total) * 100),
+      correct,
+      total,
       JSON.stringify(answers)
     ]]);
+    updateScoreSummary_(spreadsheet);
 
     return {
       success: true,
@@ -243,4 +247,32 @@ function saveExamResult_(nis, parameters) {
   } finally {
     lock.releaseLock();
   }
+}
+
+function updateScoreSummary_(spreadsheet) {
+  let summary = spreadsheet.getSheetByName(EXAM_CONFIG.summarySheet);
+  if (!summary) summary = spreadsheet.insertSheet(EXAM_CONFIG.summarySheet);
+
+  summary.getRange('A1:B5').setValues([
+    ['Ringkasan Nilai Asesmen', ''],
+    ['Nilai tertinggi', ''],
+    ['Nilai terendah', ''],
+    ['Rata-rata nilai', ''],
+    ['Jumlah percobaan', '']
+  ]);
+  summary.getRange('A6').setValue('Semua percobaan dihitung, termasuk pengulangan oleh murid yang sama.');
+  summary.getRange('B2:B5').setFormulas([
+    [`=IFERROR(MAX(ARRAYFORMULA(VALUE(FILTER(${EXAM_CONFIG.resultSheet}!D2:D,${EXAM_CONFIG.resultSheet}!D2:D<>"")))),0)`],
+    [`=IFERROR(MIN(ARRAYFORMULA(VALUE(FILTER(${EXAM_CONFIG.resultSheet}!D2:D,${EXAM_CONFIG.resultSheet}!D2:D<>"")))),0)`],
+    [`=IFERROR(AVERAGE(ARRAYFORMULA(VALUE(FILTER(${EXAM_CONFIG.resultSheet}!D2:D,${EXAM_CONFIG.resultSheet}!D2:D<>"")))),0)`],
+    [`=COUNTIF(${EXAM_CONFIG.resultSheet}!D2:D,"<>")`]
+  ]);
+  summary.getRange('A1:B1').setFontWeight('bold');
+  summary.getRange('A1:B1').setBackground('#312e81').setFontColor('#ffffff');
+  summary.getRange('A2:A5').setFontWeight('bold');
+  summary.getRange('B2:B4').setNumberFormat('0.00');
+  summary.getRange('B5').setNumberFormat('0');
+  summary.getRange('A6:B6').setFontStyle('italic').setFontColor('#475569');
+  summary.setColumnWidth(1, 260);
+  summary.setColumnWidth(2, 140);
 }
