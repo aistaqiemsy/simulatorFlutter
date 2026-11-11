@@ -841,12 +841,19 @@ function updateScoreSummary_(spreadsheet) {
   const lastResultRow = resultSheet ? resultSheet.getLastRow() : 1;
   const attempts = lastResultRow < 2
     ? []
-    : resultSheet.getRange(2, 3, lastResultRow - 1, 2).getValues()
-      .map(([nis, rawScore]) => ({
+    : resultSheet.getRange(2, 3, lastResultRow - 1, 6).getValues()
+      .map(([nis, rawScore, , , , rawLevel]) => ({
         nis: String(nis).trim(),
-        score: typeof rawScore === 'number' ? rawScore : Number(String(rawScore).trim())
+        score: typeof rawScore === 'number' ? rawScore : Number(String(rawScore).trim()),
+        level: rawLevel === '' || rawLevel === null ? 1 : Number(rawLevel)
       }))
-      .filter(attempt => attempt.nis && Number.isFinite(attempt.score));
+      .filter(attempt =>
+        attempt.nis &&
+        Number.isFinite(attempt.score) &&
+        Number.isInteger(attempt.level) &&
+        attempt.level >= 1 &&
+        attempt.level <= EXAM_CONFIG.levelCount
+      );
   const scores = attempts.map(attempt => attempt.score);
   const highest = scores.length ? Math.max(...scores) : 0;
   const lowest = scores.length ? Math.min(...scores) : 0;
@@ -867,7 +874,8 @@ function updateScoreSummary_(spreadsheet) {
         nis,
         name: String(row[EXAM_CONFIG.nameColumn - 1] || '').trim(),
         rayon: String(row[EXAM_CONFIG.rayonColumn - 1] || '').trim(),
-        scores: []
+        scores: [],
+        scoresByLevel: new Map()
       });
     });
   }
@@ -877,10 +885,16 @@ function updateScoreSummary_(spreadsheet) {
         nis: attempt.nis,
         name: '',
         rayon: '',
-        scores: []
+        scores: [],
+        scoresByLevel: new Map()
       });
     }
-    participantsByNis.get(attempt.nis).scores.push(attempt.score);
+    const participant = participantsByNis.get(attempt.nis);
+    participant.scores.push(attempt.score);
+    if (!participant.scoresByLevel.has(attempt.level)) {
+      participant.scoresByLevel.set(attempt.level, []);
+    }
+    participant.scoresByLevel.get(attempt.level).push(attempt.score);
   });
   const participantRows = [...participantsByNis.values()]
     .sort((left, right) => left.name.localeCompare(right.name) || left.nis.localeCompare(right.nis))
@@ -900,6 +914,21 @@ function updateScoreSummary_(spreadsheet) {
         participantScores.length ? Math.max(...participantScores) : ''
       ];
     });
+  const levelRows = [...participantsByNis.values()]
+    .sort((left, right) => left.name.localeCompare(right.name) || left.nis.localeCompare(right.nis))
+    .flatMap(participant => [...participant.scoresByLevel.entries()]
+      .sort(([left], [right]) => left - right)
+      .map(([level, levelScores]) => [
+        participant.nis,
+        participant.name,
+        participant.rayon,
+        level,
+        Math.max(...levelScores),
+        levelScores[levelScores.length - 1],
+        levelScores.length,
+        levelScores.some(score => score >= EXAM_CONFIG.passingScore) ? 'Lulus' : 'Belum lulus'
+      ])
+    );
 
   summary.getRange('A1:B5').setValues([
     ['Ringkasan Nilai Asesmen', ''],
@@ -918,10 +947,24 @@ function updateScoreSummary_(spreadsheet) {
   if (participantRows.length) {
     summary.getRange(10, 1, participantRows.length, 8).setValues(participantRows);
   }
+  const levelSectionRow = Math.max(12, 10 + participantRows.length + 2);
+  summary.getRange(levelSectionRow, 1, 2, 8).setValues([
+    ['Rekap Nilai Per Level', '', '', '', '', '', '', ''],
+    ['NIS', 'Nama', 'Rayon', 'Level', 'Nilai tertinggi', 'Nilai terakhir', 'Jumlah percobaan', 'Status kelulusan']
+  ]);
+  if (levelRows.length) {
+    summary.getRange(levelSectionRow + 2, 1, levelRows.length, 8).setValues(levelRows);
+    summary.getRange(levelSectionRow + 2, 1, levelRows.length, 1).setNumberFormat('@');
+    summary.getRange(levelSectionRow + 2, 4, levelRows.length, 4).setNumberFormat('0');
+  }
   summary.getRange('A1:B1').setFontWeight('bold');
   summary.getRange('A1:B1').setBackground('#312e81').setFontColor('#ffffff');
   summary.getRange('A8:H8').setFontWeight('bold');
   summary.getRange('A8:H8').setBackground('#312e81').setFontColor('#ffffff');
+  summary.getRange(levelSectionRow, 1, 1, 8).setFontWeight('bold');
+  summary.getRange(levelSectionRow, 1, 1, 8).setBackground('#312e81').setFontColor('#ffffff');
+  summary.getRange(levelSectionRow + 1, 1, 1, 8).setFontWeight('bold');
+  summary.getRange(levelSectionRow + 1, 1, 1, 8).setBackground('#e0e7ff').setFontColor('#312e81');
   summary.getRange('A9:H9').setFontWeight('bold');
   summary.getRange('A9:H9').setBackground('#e0e7ff').setFontColor('#312e81');
   summary.getRange('A2:A5').setFontWeight('bold');
@@ -939,4 +982,51 @@ function updateScoreSummary_(spreadsheet) {
 
 function refreshScoreSummary() {
   updateScoreSummary_(SpreadsheetApp.getActiveSpreadsheet());
+}
+
+function onEdit(event) {
+  const sheet = event && event.range && event.range.getSheet();
+  if (!sheet) return;
+
+  const sheetName = sheet.getName();
+  if (
+    sheetName === EXAM_CONFIG.participantSheet ||
+    sheetName === EXAM_CONFIG.resultSheet
+  ) {
+    updateScoreSummary_(event.source || SpreadsheetApp.getActiveSpreadsheet());
+  }
+}
+
+function refreshSummaryOnStructureChange_(event) {
+  const structuralChanges = [
+    'INSERT_ROW',
+    'REMOVE_ROW',
+    'INSERT_COLUMN',
+    'REMOVE_COLUMN',
+    'INSERT_GRID',
+    'REMOVE_GRID'
+  ];
+  if (!event || !structuralChanges.includes(event.changeType)) return;
+
+  updateScoreSummary_(event.source || SpreadsheetApp.getActiveSpreadsheet());
+}
+
+function installSummaryRefreshTrigger() {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  ScriptApp.getProjectTriggers()
+    .filter(trigger => trigger.getHandlerFunction() === 'refreshSummaryOnStructureChange_')
+    .forEach(trigger => ScriptApp.deleteTrigger(trigger));
+
+  ScriptApp.newTrigger('refreshSummaryOnStructureChange_')
+    .forSpreadsheet(spreadsheet)
+    .onChange()
+    .create();
+}
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('Asesmen')
+    .addItem('Perbarui Ringkasan Nilai', 'refreshScoreSummary')
+    .addItem('Aktifkan Pembaruan Otomatis', 'installSummaryRefreshTrigger')
+    .addToUi();
 }
