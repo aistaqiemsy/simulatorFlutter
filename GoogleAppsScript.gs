@@ -1,4 +1,5 @@
 const EXAM_CONFIG = {
+  levelCount: 10,
   participantSheet: 'Peserta',
   resultSheet: 'Hasil_Ujian',
   summarySheet: 'Ringkasan_Nilai',
@@ -121,6 +122,10 @@ const EXAM_QUESTIONS = [
   }
 ];
 
+const EXAM_QUESTIONS_BY_LEVEL = {
+  1: EXAM_QUESTIONS
+};
+
 function doGet(event) {
   const callback = event && event.parameter && event.parameter.callback;
   if (!callback || !/^flutterLabCallback_[A-Za-z0-9_]+$/.test(callback)) {
@@ -151,12 +156,19 @@ function handleExamRequest_(parameters) {
   if (action === 'start') {
     return {
       success: true,
-      participant
+      participant,
+      levels: getParticipantLevelProgress_(nis)
     };
   }
 
   if (action === 'questions') {
-    const questions = EXAM_QUESTIONS.map(({ id, question, options }) => ({ id, question, options }));
+    const level = Number(parameters.level);
+    const levelQuestions = getExamQuestions_(level);
+    if (!levelQuestions.length) {
+      return { success: false, message: 'Soal untuk level ini belum tersedia.' };
+    }
+
+    const questions = levelQuestions.map(({ id, question, options }) => ({ id, question, options }));
     for (let index = questions.length - 1; index > 0; index--) {
       const randomIndex = Math.floor(Math.random() * (index + 1));
       [questions[index], questions[randomIndex]] = [questions[randomIndex], questions[index]];
@@ -173,6 +185,40 @@ function handleExamRequest_(parameters) {
   }
 
   return { success: false, message: 'Aksi ujian tidak dikenal.' };
+}
+
+function getExamQuestions_(level) {
+  return Number.isInteger(level) ? EXAM_QUESTIONS_BY_LEVEL[level] || [] : [];
+}
+
+function getParticipantLevelProgress_(nis) {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = spreadsheet.getSheetByName(EXAM_CONFIG.resultSheet);
+  const scoresByLevel = new Map();
+  if (sheet && sheet.getLastRow() >= 2) {
+    sheet.getRange(2, 3, sheet.getLastRow() - 1, 6).getDisplayValues().forEach(
+      ([attemptNis, rawScore, , , , rawLevel]) => {
+        if (String(attemptNis).trim() !== nis) return;
+        const level = rawLevel ? Number(rawLevel) : 1;
+        const score = Number(rawScore);
+        if (!Number.isInteger(level) || level < 1 || level > EXAM_CONFIG.levelCount || !Number.isFinite(score)) return;
+        if (!scoresByLevel.has(level)) scoresByLevel.set(level, []);
+        scoresByLevel.get(level).push(score);
+      }
+    );
+  }
+
+  return Array.from({ length: EXAM_CONFIG.levelCount }, (_, index) => {
+    const id = index + 1;
+    const scores = scoresByLevel.get(id) || [];
+    return {
+      id,
+      available: getExamQuestions_(id).length > 0,
+      attempts: scores.length,
+      highestScore: scores.length ? Math.max(...scores) : null,
+      passed: scores.some(score => score >= EXAM_CONFIG.passingScore)
+    };
+  });
 }
 
 function getParticipant_(nis) {
@@ -199,6 +245,12 @@ function getParticipant_(nis) {
 }
 
 function saveExamResult_(nis, parameters) {
+  const level = Number(parameters.level);
+  const questions = getExamQuestions_(level);
+  if (!questions.length) {
+    return { success: false, message: 'Soal untuk level ini belum tersedia.' };
+  }
+
   let answers;
   try {
     answers = JSON.parse(parameters.answers || '{}');
@@ -209,11 +261,11 @@ function saveExamResult_(nis, parameters) {
     return { success: false, message: 'Format jawaban tidak valid.' };
   }
 
-  const correct = EXAM_QUESTIONS.reduce(
-    (total, question) => total + (answers[question.id] === question.answer ? 1 : 0),
+  const total = questions.length;
+  const levelCorrect = questions.reduce(
+    (count, question) => count + (answers[question.id] === question.answer ? 1 : 0),
     0
   );
-  const total = EXAM_QUESTIONS.length;
   const lock = LockService.getScriptLock();
   lock.waitLock(30000);
 
@@ -223,15 +275,19 @@ function saveExamResult_(nis, parameters) {
     if (!sheet) sheet = spreadsheet.insertSheet(EXAM_CONFIG.resultSheet);
 
     if (sheet.getLastRow() === 0) {
-      sheet.appendRow(['No. Ujian', 'Waktu', 'NIS', 'Nilai (%)', 'Benar', 'Jumlah Soal', 'Jawaban']);
+      sheet.appendRow(['No. Ujian', 'Waktu', 'NIS', 'Nilai (%)', 'Benar', 'Jumlah Soal', 'Jawaban', 'Level']);
+    } else if (!sheet.getRange(1, 8).getDisplayValue()) {
+      sheet.getRange(1, 8).setValue('Level');
     }
 
     const attemptNumber = sheet.getLastRow();
     const previousAttempts = attemptNumber > 1
-      ? sheet.getRange(2, 3, attemptNumber - 1, 1).getDisplayValues()
-        .some(([previousNis]) => String(previousNis).trim() === nis)
+      ? sheet.getRange(2, 3, attemptNumber - 1, 6).getDisplayValues()
+        .some(([previousNis, , , , , previousLevel]) =>
+          String(previousNis).trim() === nis && Number(previousLevel || 1) === level
+        )
       : false;
-    const rawScore = Math.round((correct / total) * 100);
+    const rawScore = Math.round((levelCorrect / total) * 100);
     const score = previousAttempts
       ? Math.min(rawScore, EXAM_CONFIG.passingScore)
       : rawScore;
@@ -239,24 +295,28 @@ function saveExamResult_(nis, parameters) {
     sheet.getRange(row, 1, 1, 3).setNumberFormat('@');
     sheet.getRange(row, 4, 1, 3).setNumberFormat('0');
     sheet.getRange(row, 7, 1, 1).setNumberFormat('@');
-    sheet.getRange(row, 1, 1, 7).setValues([[
+    sheet.getRange(row, 8, 1, 1).setNumberFormat('0');
+    sheet.getRange(row, 1, 1, 8).setValues([[
       String(attemptNumber),
       new Date().toISOString(),
       nis,
       score,
-      correct,
+      levelCorrect,
       total,
-      JSON.stringify(answers)
+      JSON.stringify(answers),
+      level
     ]]);
     updateScoreSummary_(spreadsheet);
 
     return {
       success: true,
       attemptNumber,
+      level,
       score,
-      correct,
+      correct: levelCorrect,
       total,
-      passed: score >= EXAM_CONFIG.passingScore
+      passed: score >= EXAM_CONFIG.passingScore,
+      levels: getParticipantLevelProgress_(nis)
     };
   } finally {
     lock.releaseLock();
