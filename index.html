@@ -103,6 +103,7 @@
                 catch (error) { return DEFAULT_EXAM_ENDPOINT; }
             });
             const [examNis, setExamNis] = useState('');
+            const [examParticipant, setExamParticipant] = useState(null);
             const [examQuestions, setExamQuestions] = useState([]);
             const [examAnswers, setExamAnswers] = useState({});
             const [examStatus, setExamStatus] = useState('locked');
@@ -161,13 +162,29 @@
                 setExamResult(null);
                 try {
                     const response = await requestExamApi({ action: 'start', nis: examNis.trim() });
-                    if (!response.success) throw new Error(response.message || 'NIS tidak dapat diverifikasi.');
-                    setExamQuestions(response.questions);
-                    setExamAnswers({});
-                    setExamStatus('inProgress');
+                    if (!response.success || !response.participant) throw new Error(response.message || 'NIS tidak dapat diverifikasi.');
+                    setExamParticipant(response.participant);
+                    setExamStatus('verified');
                     setExamDialogOpen(false);
                 } catch (error) {
                     setExamStatus('locked');
+                    setExamError(error.message);
+                } finally {
+                    setExamLoading(false);
+                }
+            };
+            const beginAssessment = async () => {
+                setExamLoading(true);
+                setExamError('');
+                try {
+                    const response = await requestExamApi({ action: 'questions', nis: examNis.trim() });
+                    if (!response.success || !Array.isArray(response.questions) || response.questions.length === 0) {
+                        throw new Error(response.message || 'Soal asesmen belum tersedia.');
+                    }
+                    setExamQuestions(response.questions);
+                    setExamAnswers({});
+                    setExamStatus('inProgress');
+                } catch (error) {
                     setExamError(error.message);
                 } finally {
                     setExamLoading(false);
@@ -187,7 +204,7 @@
                         answers: JSON.stringify(examAnswers)
                     });
                     if (!response.success) throw new Error(response.message || 'Jawaban belum dapat disimpan.');
-                    setExamResult(response);
+                    setExamResult({ ...response, passed: response.score >= 75 });
                     setExamStatus('completed');
                 } catch (error) {
                     setExamError(error.message);
@@ -201,6 +218,7 @@
                 setExamQuestions([]);
                 setExamAnswers({});
                 setExamResult(null);
+                setExamParticipant(null);
                 setExamError('');
             };
             const openExam = () => {
@@ -585,6 +603,27 @@ class _CounterPageState extends State<CounterPage> {
                                         </div>
                                     )}
 
+                                    {examStatus === 'verified' && examParticipant && (
+                                        <div className="overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-sm">
+                                            <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-4 text-white">
+                                                <p className="text-xs font-semibold uppercase tracking-wider text-indigo-100">Identitas peserta terverifikasi</p>
+                                                <h3 className="mt-1 text-xl font-bold">{examParticipant.name || 'Nama belum diisi'}</h3>
+                                            </div>
+                                            <div className="space-y-3 p-5">
+                                                <div className="flex items-center justify-between border-b border-slate-100 pb-3 text-sm">
+                                                    <span className="text-slate-500">NIS</span><b className="text-slate-800">{examParticipant.nis}</b>
+                                                </div>
+                                                <div className="flex items-center justify-between text-sm">
+                                                    <span className="text-slate-500">Rayon</span><b className="text-slate-800">{examParticipant.rayon || 'Belum diisi'}</b>
+                                                </div>
+                                                {examError && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{examError}</p>}
+                                                <button onClick={beginAssessment} disabled={examLoading} className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3.5 font-bold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-60">
+                                                    {examLoading ? 'Menyiapkan asesmen...' : 'Kerjakan Asesmen!'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {examDialogOpen && examStatus === 'locked' && (
                                         <div
                                             className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm"
@@ -640,12 +679,40 @@ class _CounterPageState extends State<CounterPage> {
                                     )}
 
                                     {examStatus === 'completed' && examResult && (
-                                        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-5 text-center">
-                                            <h3 className="font-bold text-emerald-900 text-lg">Ujian berhasil disimpan</h3>
-                                            <p className="text-4xl font-bold text-emerald-700 my-3">{examResult.score}%</p>
-                                            <p className="text-sm text-emerald-900">{examResult.correct} dari {examResult.total} jawaban benar</p>
-                                            <p className="text-xs text-emerald-800 mt-2">Nomor percobaan: {examResult.attemptNumber} · NIS: {examNis}</p>
-                                            <button onClick={resetExam} className="mt-4 rounded border border-emerald-700 px-4 py-2 text-sm font-bold text-emerald-800 hover:bg-emerald-100">Kembali</button>
+                                        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+                                            <div role="dialog" aria-modal="true" aria-labelledby="exam-result-title" className="w-full max-w-md overflow-hidden rounded-3xl bg-white text-center shadow-2xl">
+                                                {examResult.passed ? (
+                                                    <div className="bg-gradient-to-b from-emerald-50 to-white px-6 pb-6 pt-8">
+                                                        <svg viewBox="0 0 160 120" role="img" aria-label="Ilustrasi keberhasilan" className="mx-auto mb-4 h-28 w-40">
+                                                            <circle cx="80" cy="61" r="48" fill="#d1fae5" />
+                                                            <path d="M56 61l16 16 34-36" fill="none" stroke="#059669" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+                                                            <path d="M29 23l4 10 10 4-10 4-4 10-4-10-10-4 10-4 4-10zm103 44l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z" fill="#fbbf24" />
+                                                        </svg>
+                                                        <p className="text-sm font-bold uppercase tracking-widest text-emerald-700">Target tercapai</p>
+                                                        <h3 id="exam-result-title" className="mt-1 text-2xl font-extrabold text-slate-900">Asesmen Berhasil!</h3>
+                                                        <p className="mt-2 text-sm text-slate-600">Hebat, {examParticipant ? examParticipant.name || 'peserta' : 'peserta'}! Kamu sudah mencapai nilai minimum.</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="bg-gradient-to-b from-amber-50 to-white px-6 pb-6 pt-8">
+                                                        <svg viewBox="0 0 160 120" role="img" aria-label="Ilustrasi tetap semangat belajar" className="mx-auto mb-4 h-28 w-40">
+                                                            <circle cx="80" cy="61" r="48" fill="#fef3c7" />
+                                                            <path d="M54 43l18 18-18 18M106 43L88 61l18 18" fill="none" stroke="#d97706" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
+                                                            <path d="M20 24l4 9 9 4-9 4-4 9-4-9-9-4 9-4 4-9zm116 49l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z" fill="#f59e0b" />
+                                                        </svg>
+                                                        <p className="text-sm font-bold uppercase tracking-widest text-amber-700">Terus berlatih</p>
+                                                        <h3 id="exam-result-title" className="mt-1 text-2xl font-extrabold text-slate-900">Belum Berhasil</h3>
+                                                        <p className="mt-2 text-sm text-slate-600">Jangan menyerah, {examParticipant ? examParticipant.name || 'peserta' : 'peserta'}. Pelajari kembali materi lalu coba lagi.</p>
+                                                    </div>
+                                                )}
+                                                <div className="px-6 pb-6">
+                                                    <div className={`mx-auto -mt-2 inline-flex items-baseline gap-1 rounded-full px-5 py-2 ${examResult.passed ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                                                        <span className="text-3xl font-extrabold">{examResult.score}</span><span className="text-sm font-bold">/ 100</span>
+                                                    </div>
+                                                    <p className="mt-3 text-sm text-slate-600">{examResult.correct} dari {examResult.total} jawaban benar · batas kelulusan 75</p>
+                                                    <p className="mt-1 text-xs text-slate-400">Percobaan #{examResult.attemptNumber} · NIS {examNis}</p>
+                                                    <button onClick={resetExam} className={`mt-5 w-full rounded-xl px-5 py-3 font-bold text-white shadow-md transition hover:-translate-y-0.5 ${examResult.passed ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-amber-600 hover:bg-amber-700'}`}>Selesai</button>
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                     <p className="text-xs text-gray-500">Catatan: NIS berfungsi sebagai pemeriksaan kelayakan, bukan autentikasi identitas yang kuat. Batasi akses spreadsheet hanya untuk pengelola.</p>

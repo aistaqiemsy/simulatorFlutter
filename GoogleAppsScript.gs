@@ -1,7 +1,10 @@
 const EXAM_CONFIG = {
   participantSheet: 'Peserta',
   resultSheet: 'Hasil_Ujian',
-  nisColumn: 1
+  nisColumn: 1,
+  nameColumn: 2,
+  rayonColumn: 3,
+  passingScore: 75
 };
 
 const EXAM_QUESTIONS = [
@@ -139,11 +142,19 @@ function handleExamRequest_(parameters) {
   const action = parameters.action;
   const nis = String(parameters.nis || '').trim();
   if (!nis) return { success: false, message: 'NIS wajib diisi.' };
-  if (!isRegisteredNis_(nis)) {
+  const participant = getParticipant_(nis);
+  if (!participant) {
     return { success: false, message: 'NIS tidak terdaftar. Silakan hubungi pengajar.' };
   }
 
   if (action === 'start') {
+    return {
+      success: true,
+      participant
+    };
+  }
+
+  if (action === 'questions') {
     return {
       success: true,
       questions: EXAM_QUESTIONS.map(({ id, question, options }) => ({ id, question, options }))
@@ -157,7 +168,7 @@ function handleExamRequest_(parameters) {
   return { success: false, message: 'Aksi ujian tidak dikenal.' };
 }
 
-function isRegisteredNis_(nis) {
+function getParticipant_(nis) {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = spreadsheet && spreadsheet.getSheetByName(EXAM_CONFIG.participantSheet);
   if (!sheet) {
@@ -166,10 +177,18 @@ function isRegisteredNis_(nis) {
 
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return false;
-  const nisValues = sheet
-    .getRange(2, EXAM_CONFIG.nisColumn, lastRow - 1, 1)
+  const lastColumn = Math.max(EXAM_CONFIG.nisColumn, EXAM_CONFIG.nameColumn, EXAM_CONFIG.rayonColumn);
+  const participants = sheet
+    .getRange(2, 1, lastRow - 1, lastColumn)
     .getDisplayValues();
-  return nisValues.some(([value]) => String(value).trim() === nis);
+  const participant = participants.find(row => String(row[EXAM_CONFIG.nisColumn - 1]).trim() === nis);
+  if (!participant) return null;
+
+  return {
+    nis,
+    name: String(participant[EXAM_CONFIG.nameColumn - 1] || '').trim(),
+    rayon: String(participant[EXAM_CONFIG.rayonColumn - 1] || '').trim()
+  };
 }
 
 function saveExamResult_(nis, parameters) {
@@ -218,7 +237,8 @@ function saveExamResult_(nis, parameters) {
       attemptNumber,
       score: Math.round((correct / total) * 100),
       correct,
-      total
+      total,
+      passed: Math.round((correct / total) * 100) >= EXAM_CONFIG.passingScore
     };
   } finally {
     lock.releaseLock();
