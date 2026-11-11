@@ -11,12 +11,24 @@
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-dart.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        .font-mono, code, pre { font-family: 'JetBrains Mono', monospace; }
+        .font-mono, code, pre { font-family: 'JetBrains Mono', monospace !important; }
+        .code-editor { background: #1e1e1e; color: #d4d4d4; }
+        .code-editor .token.comment, .code-editor .token.prolog, .code-editor .token.doctype { color: #6a9955; }
+        .code-editor .token.keyword, .code-editor .token.selector { color: #c586c0; }
+        .code-editor .token.string, .code-editor .token.char { color: #ce9178; }
+        .code-editor .token.number, .code-editor .token.boolean, .code-editor .token.constant { color: #b5cea8; }
+        .code-editor .token.function { color: #dcdcaa; }
+        .code-editor .token.class-name, .code-editor .token.builtin { color: #4ec9b0; }
+        .code-editor .token.property, .code-editor .token.parameter { color: #9cdcfe; }
+        .code-editor .token.operator, .code-editor .token.punctuation { color: #d4d4d4; }
+        .code-editor .token.annotation { color: #dcdcaa; }
         .phone-mockup { width: min(340px, 100%); height: min(680px, calc(100vh - 2rem)); min-height: 480px; border: 14px solid #1e293b; border-radius: 40px; overflow: hidden; position: relative; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); background-color: white; display: flex; flex-direction: column; transition: all 0.3s ease; }
         .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 25px; background-color: #1e293b; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; z-index: 50; }
         .flash-render { animation: flashBg 0.6s ease-out; }
@@ -38,6 +50,15 @@
 
     <script type="text/babel">
         const { useState } = React;
+        const highlightDartCode = (source) => {
+            const text = String(source);
+            if (!window.Prism || !Prism.languages.dart) {
+                return text.replace(/[&<>"']/g, (character) => ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+                })[character]);
+            }
+            return Prism.highlight(text, Prism.languages.dart, 'dart');
+        };
         const DEFAULT_EXAM_ENDPOINT = 'https://script.google.com/a/macros/smkwikrama.sch.id/s/AKfycbyzFs7nEeYNk_O6LaVZD6k9ht4JRJDU2NuQ7tF444zY-PfTiTsiybRMWehEi8wqhNCx/exec';
         const isAppsScriptEndpoint = (url) => url.protocol === 'https:'
             && url.hostname === 'script.google.com'
@@ -563,7 +584,7 @@ class _CounterPageState extends State<CounterPage> {
                                             <span className="text-xs font-bold">Kode Flutter yang dihasilkan</span>
                                             <button onClick={copyBuilderCode} className="text-xs px-3 py-1 rounded bg-blue-600 hover:bg-blue-500">Salin kode</button>
                                         </div>
-                                        <pre className="text-xs p-4 overflow-x-auto whitespace-pre-wrap">{getBuilderCode()}</pre>
+                                        <pre className="code-editor text-xs p-4 overflow-x-auto whitespace-pre-wrap"><code className="language-dart" dangerouslySetInnerHTML={{ __html: highlightDartCode(getBuilderCode()) }} /></pre>
                                     </div>
                                 </div>
                             )}
@@ -606,7 +627,7 @@ class _CounterPageState extends State<CounterPage> {
                                             <span className="text-xs font-bold">Contoh app counter (lib/main.dart)</span>
                                             <button onClick={copyStarterCode} className="text-xs px-3 py-1 rounded bg-blue-600 hover:bg-blue-500">Salin kode</button>
                                         </div>
-                                        <pre className="text-xs p-4 overflow-x-auto whitespace-pre">{getStarterCode()}</pre>
+                                        <pre className="code-editor text-xs p-4 overflow-x-auto whitespace-pre"><code className="language-dart" dangerouslySetInnerHTML={{ __html: highlightDartCode(getStarterCode()) }} /></pre>
                                     </div>
                                 </div>
                             )}
