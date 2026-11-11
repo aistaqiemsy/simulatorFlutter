@@ -11,8 +11,12 @@
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
+        .font-mono, code, pre { font-family: 'JetBrains Mono', monospace; }
         .phone-mockup { width: min(340px, 100%); height: min(680px, calc(100vh - 2rem)); min-height: 480px; border: 14px solid #1e293b; border-radius: 40px; overflow: hidden; position: relative; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); background-color: white; display: flex; flex-direction: column; transition: all 0.3s ease; }
         .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 25px; background-color: #1e293b; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; z-index: 50; }
         .flash-render { animation: flashBg 0.6s ease-out; }
