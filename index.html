@@ -102,10 +102,6 @@
                 try { return localStorage.getItem('flutterExamEndpoint') || DEFAULT_EXAM_ENDPOINT; }
                 catch (error) { return DEFAULT_EXAM_ENDPOINT; }
             });
-            const [examEndpointDraft, setExamEndpointDraft] = useState(() => {
-                try { return localStorage.getItem('flutterExamEndpoint') || DEFAULT_EXAM_ENDPOINT; }
-                catch (error) { return DEFAULT_EXAM_ENDPOINT; }
-            });
             const [examNis, setExamNis] = useState('');
             const [examQuestions, setExamQuestions] = useState([]);
             const [examAnswers, setExamAnswers] = useState({});
@@ -125,7 +121,7 @@
                 try {
                     endpoint = new URL(examEndpoint);
                 } catch (error) {
-                    reject(new Error('Alamat backend belum diatur. Buka Pengaturan koneksi Google Sheets.'));
+                    reject(new Error('Alamat backend belum diatur. Periksa konfigurasi aplikasi.'));
                     return;
                 }
                 if (!isAppsScriptEndpoint(endpoint)) {
@@ -158,21 +154,6 @@
                 script.src = endpoint.toString();
                 document.head.appendChild(script);
             });
-            const saveExamEndpoint = () => {
-                try {
-                    const endpoint = new URL(examEndpointDraft.trim());
-                    if (!isAppsScriptEndpoint(endpoint)) {
-                        throw new Error('Gunakan URL web app Google Apps Script yang berakhiran /exec.');
-                    }
-                    localStorage.setItem('flutterExamEndpoint', endpoint.toString());
-                    setExamEndpoint(endpoint.toString());
-                    setExamEndpointDraft(endpoint.toString());
-                    setExamError('');
-                    showAlert('Koneksi backend ujian tersimpan di browser ini.');
-                } catch (error) {
-                    setExamError(error.message === 'Invalid URL' ? 'URL backend tidak valid.' : error.message);
-                }
-            };
             const startExam = async (event) => {
                 event.preventDefault();
                 setExamLoading(true);
@@ -598,21 +579,6 @@ class _CounterPageState extends State<CounterPage> {
                                         <h2 className="font-bold text-indigo-900">Ujian pemahaman Flutter</h2>
                                         <p className="text-sm text-indigo-900 mt-1">Masukkan NIS yang terdaftar. NIS diverifikasi di Google Sheets sebelum soal dibuka. Setiap pengiriman ujian dinilai oleh backend dan dicatat sebagai baris baru.</p>
                                     </div>
-                                    <details className="bg-slate-50 border rounded-lg p-4">
-                                        <summary className="cursor-pointer font-bold text-sm">Pengaturan koneksi Google Sheets (pengajar)</summary>
-                                        <p className="text-xs text-gray-600 mt-3">URL Apps Script sudah diatur sebagai koneksi bawaan untuk seluruh pengunjung situs. Ubah hanya jika URL deployment berganti. Spreadsheet harus memiliki tab <code>Peserta</code> dengan header di baris pertama dan NIS di kolom A.</p>
-                                        <label className="block text-xs font-medium mt-3">URL web app Apps Script
-                                            <input value={examEndpointDraft} onChange={(event) => setExamEndpointDraft(event.target.value)} placeholder="https://script.google.com/macros/s/.../exec" className="mt-1 w-full border rounded p-2 text-sm" />
-                                        </label>
-                                        <button onClick={saveExamEndpoint} className="mt-2 rounded bg-slate-800 text-white px-3 py-2 text-xs font-bold hover:bg-slate-700">Simpan URL di browser ini</button>
-                                        <ol className="list-decimal ml-5 mt-3 space-y-1 text-xs text-gray-600">
-                                            <li>Di Google Sheets, pastikan tab <code>Peserta</code> memiliki header di baris pertama dan daftar NIS berformat teks di kolom A.</li>
-                                            <li>Pilih <b>Ekstensi → Apps Script</b>, ganti isi editor dengan kode di <code>GoogleAppsScript.gs</code>, lalu simpan.</li>
-                                            <li>Pilih <b>Deploy → New deployment → Web app</b>; jalankan sebagai pemilik spreadsheet dan atur akses agar peserta dapat membuka ujian.</li>
-                                            <li>Salin URL web app berakhiran <code>/exec</code> ke kolom di atas. Tab <code>Hasil_Ujian</code> dibuat otomatis saat percobaan pertama disimpan.</li>
-                                        </ol>
-                                    </details>
-
                                     {examStatus === 'locked' && (
                                         <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-4 text-center text-sm text-indigo-900">
                                             Form NIS akan muncul saat tombol <b>Mulai Ujian</b> di bagian atas ditekan.
