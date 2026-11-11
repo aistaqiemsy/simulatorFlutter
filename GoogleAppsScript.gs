@@ -179,6 +179,116 @@ const EXAM_QUESTIONS_BY_LEVEL = {
         { id: 'd', text: 'Pada properti leading milik Scaffold' }
       ],
       answer: 'a'
+    },
+    {
+      id: 'home_tab_icons',
+      question: 'Ikon apa yang dipakai untuk tab kedua pada TabBar HomePage?',
+      options: [
+        { id: 'a', text: 'Icons.circle_outlined' },
+        { id: 'b', text: 'Icons.chat' },
+        { id: 'c', text: 'Icons.call' },
+        { id: 'd', text: 'Icons.send' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'appbar_bottom',
+      question: 'TabBar pada HomePage dipasang melalui properti AppBar yang mana?',
+      options: [
+        { id: 'a', text: 'bottom' },
+        { id: 'b', text: 'leading' },
+        { id: 'c', text: 'actions' },
+        { id: 'd', text: 'title' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'home_scaffold',
+      question: 'Widget mana yang menjadi kerangka halaman HomePage dan menampung AppBar serta body?',
+      options: [
+        { id: 'a', text: 'Scaffold' },
+        { id: 'b', text: 'ListTile' },
+        { id: 'c', text: 'CircleAvatar' },
+        { id: 'd', text: 'MaterialPageRoute' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'padding_card',
+      question: 'Pada kartu My Friend, Padding digunakan untuk apa?',
+      options: [
+        { id: 'a', text: 'Memberi jarak di sekitar Card' },
+        { id: 'b', text: 'Membuka halaman DetailChat' },
+        { id: 'c', text: 'Mengendalikan perpindahan tab' },
+        { id: 'd', text: 'Menampilkan ikon profil' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'listtile_subtitle',
+      question: 'Pada ListTile percakapan, teks "Hi!" ditampilkan melalui properti apa?',
+      options: [
+        { id: 'a', text: 'subtitle' },
+        { id: 'b', text: 'leading' },
+        { id: 'c', text: 'trailing' },
+        { id: 'd', text: 'bottom' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'listtile_leading',
+      question: 'Apa yang ditampilkan oleh properti leading pada ListTile My Friend?',
+      options: [
+        { id: 'a', text: 'Ikon person di sisi awal baris' },
+        { id: 'b', text: 'Teks "Hi!" di bawah nama' },
+        { id: 'c', text: 'Angka "50" di sisi akhir baris' },
+        { id: 'd', text: 'Tab untuk membuka DetailChat' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'route_builder_detail',
+      question: 'Widget apa yang dikembalikan oleh builder pada MaterialPageRoute ketika kartu chat diketuk?',
+      options: [
+        { id: 'a', text: 'DetailChat' },
+        { id: 'b', text: 'TabBar' },
+        { id: 'c', text: 'TextField' },
+        { id: 'd', text: 'DefaultTabController' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'debug_banner',
+      question: 'Apa dampak debugShowCheckedModeBanner: false pada MaterialApp?',
+      options: [
+        { id: 'a', text: 'Menyembunyikan penanda debug pada tampilan aplikasi' },
+        { id: 'b', text: 'Menonaktifkan semua tombol debugPrint' },
+        { id: 'c', text: 'Menghapus AppBar dari HomePage' },
+        { id: 'd', text: 'Mengubah aplikasi menjadi mode produksi secara otomatis' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'chat_card_elevation',
+      question: 'Properti elevation pada Card My Friend berkaitan dengan apa?',
+      options: [
+        { id: 'a', text: 'Kesan ketinggian atau bayangan Card' },
+        { id: 'b', text: 'Jumlah pesan pada ListView' },
+        { id: 'c', text: 'Jarak antar tab' },
+        { id: 'd', text: 'Ukuran teks subtitle' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'home_body_tabs',
+      question: 'Widget apa yang menghubungkan pilihan tab dengan halaman konten pada body HomePage?',
+      options: [
+        { id: 'a', text: 'TabBarView' },
+        { id: 'b', text: 'MaterialPageRoute' },
+        { id: 'c', text: 'ListTile' },
+        { id: 'd', text: 'CircleAvatar' }
+      ],
+      answer: 'a'
     }
   ],
   3: [
@@ -234,6 +344,116 @@ const EXAM_QUESTIONS_BY_LEVEL = {
         { id: 'b', text: 'Membuka halaman DetailChat yang baru' },
         { id: 'c', text: 'Berpindah ke tab telepon pada HomePage' },
         { id: 'd', text: 'Menghapus semua pesan dari ListView' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'tab_count_consistency',
+      question: 'Jika satu Tab ditambahkan, perubahan apa yang perlu dipertimbangkan pada struktur tab?',
+      options: [
+        { id: 'a', text: 'Sesuaikan jumlah pada controller dan sediakan halaman pasangannya di TabBarView' },
+        { id: 'b', text: 'Ubah elevation Card menjadi jumlah tab baru' },
+        { id: 'c', text: 'Hapus seluruh children dari TabBarView' },
+        { id: 'd', text: 'Pindahkan TabBar ke dalam TextField' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'route_push_result',
+      question: 'Apa yang dilakukan Navigator.push dalam callback InkWell pada HomePage?',
+      options: [
+        { id: 'a', text: 'Menambahkan halaman DetailChat di atas halaman saat ini' },
+        { id: 'b', text: 'Mengganti isi subtitle ListTile' },
+        { id: 'c', text: 'Menghapus halaman HomePage dari aplikasi' },
+        { id: 'd', text: 'Memilih tab status pada TabBar' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'route_pop_result',
+      question: 'Setelah DetailChat dibuka dengan Navigator.push, apa yang terjadi saat tombol kembali menjalankan Navigator.pop?',
+      options: [
+        { id: 'a', text: 'Halaman DetailChat ditutup dan halaman sebelumnya terlihat kembali' },
+        { id: 'b', text: 'Halaman DetailChat ditumpuk sekali lagi' },
+        { id: 'c', text: 'Aplikasi berpindah otomatis ke tab kedua' },
+        { id: 'd', text: 'Isi ListView pesan dihapus' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'home_chat_card_flow',
+      question: 'Urutan alur saat pengguna membuka percakapan My Friend yang paling tepat adalah ...',
+      options: [
+        { id: 'a', text: 'Ketuk InkWell, jalankan onTap, lalu Navigator membuka route DetailChat' },
+        { id: 'b', text: 'Ketuk subtitle, ubah TabController, lalu hapus Scaffold' },
+        { id: 'c', text: 'Tekan TabBarView, jalankan TextField, lalu panggil debugPrint' },
+        { id: 'd', text: 'Ketuk Card, panggil Navigator.pop, lalu buka ListView kosong' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'chat_appbar_parts',
+      question: 'Bagian mana pada AppBar DetailChat yang menampilkan avatar dan nama TemanQ?',
+      options: [
+        { id: 'a', text: 'title berupa Row yang berisi CircleAvatar dan Text' },
+        { id: 'b', text: 'leading berupa TabBarView' },
+        { id: 'c', text: 'actions berupa ListView pesan' },
+        { id: 'd', text: 'bottom berupa TextField' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'chat_message_children',
+      question: 'Mengapa dua pesan contoh muncul di ListView DetailChat?',
+      options: [
+        { id: 'a', text: 'Karena widget pesan ditulis sebagai children ListView' },
+        { id: 'b', text: 'Karena ListView membaca subtitle ListTile secara otomatis' },
+        { id: 'c', text: 'Karena TextField mengirim pesan saat halaman dibuka' },
+        { id: 'd', text: 'Karena Navigator membuat pesan bawaan' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'column_order',
+      question: 'Berdasarkan urutan children Column pada DetailChat, bagian mana yang muncul setelah area daftar pesan?',
+      options: [
+        { id: 'a', text: 'Area input pesan yang dibungkus Padding' },
+        { id: 'b', text: 'TabBar HomePage' },
+        { id: 'c', text: 'Card My Friend' },
+        { id: 'd', text: 'AppBar HomePage' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'expanded_remaining_space',
+      question: 'Bagaimana Expanded membantu membagi tinggi pada Column halaman chat?',
+      options: [
+        { id: 'a', text: 'ListView mengambil ruang yang tersedia, menyisakan ruang untuk baris input' },
+        { id: 'b', text: 'ListView mengambil seluruh layar termasuk AppBar' },
+        { id: 'c', text: 'Row input berpindah ke atas AppBar' },
+        { id: 'd', text: 'Semua pesan berubah menjadi tab' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'tab_body_order',
+      question: 'Bagaimana TabBarView menentukan konten yang tampil untuk sebuah tab?',
+      options: [
+        { id: 'a', text: 'Konten pada posisi yang sama dalam daftar children dipasangkan dengan tab tersebut' },
+        { id: 'b', text: 'Konten dipilih berdasarkan warna AppBar' },
+        { id: 'c', text: 'Selalu menampilkan children terakhir' },
+        { id: 'd', text: 'Membuka route baru untuk setiap tab secara otomatis' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'push_vs_pop',
+      question: 'Apa perbedaan tujuan Navigator.push dan Navigator.pop pada kedua file?',
+      options: [
+        { id: 'a', text: 'push membuka route baru, sedangkan pop menutup route teratas' },
+        { id: 'b', text: 'push mengirim pesan, sedangkan pop menghapus tab' },
+        { id: 'c', text: 'push mengubah warna, sedangkan pop mengubah ukuran teks' },
+        { id: 'd', text: 'Keduanya selalu membuka halaman baru' }
       ],
       answer: 'a'
     }
@@ -293,350 +513,118 @@ const EXAM_QUESTIONS_BY_LEVEL = {
         { id: 'd', text: 'Keduanya hanya mengatur warna latar AppBar' }
       ],
       answer: 'a'
-    }
-  ],
-  5: [
+    },
     {
-      id: 'stateful_home',
-      question: 'HomePage menggunakan StatefulWidget, tetapi tidak memiliki variabel state yang berubah. Apa kesimpulan yang paling tepat?',
+      id: 'send_button_behavior',
+      question: 'Setelah pengguna mengetik pesan lalu menekan IconButton kirim, apa efek yang benar-benar dijalankan kode?',
       options: [
-        { id: 'a', text: 'Saat ini StatefulWidget belum diperlukan dan dapat dipertimbangkan menjadi StatelessWidget' },
-        { id: 'b', text: 'HomePage wajib StatefulWidget karena memiliki AppBar' },
-        { id: 'c', text: 'StatefulWidget otomatis menyimpan semua pesan' },
-        { id: 'd', text: 'Mengubahnya menjadi StatelessWidget akan menghapus Navigator' }
+        { id: 'a', text: 'Callback menjalankan debugPrint dengan teks "Mengirim pesan!"' },
+        { id: 'b', text: 'Teks input otomatis ditambahkan ke ListView' },
+        { id: 'c', text: 'Pesan dikirim ke kontak melalui jaringan' },
+        { id: 'd', text: 'TextField otomatis dibersihkan dan disimpan' }
       ],
       answer: 'a'
     },
     {
-      id: 'stateful_detail',
-      question: 'DetailChat juga menggunakan StatefulWidget, tetapi tidak memanggil setState. Apa penilaian yang paling masuk akal untuk kode saat ini?',
+      id: 'video_action_behavior',
+      question: 'Apa yang dilakukan callback tombol video pada AppBar DetailChat?',
       options: [
-        { id: 'a', text: 'Belum terlihat kebutuhan state yang berubah; StatelessWidget mungkin cukup untuk tampilan saat ini' },
-        { id: 'b', text: 'StatefulWidget diperlukan agar debugPrint bekerja' },
-        { id: 'c', text: 'Setiap halaman yang memakai Scaffold wajib StatefulWidget' },
-        { id: 'd', text: 'StatelessWidget tidak dapat memiliki tombol' }
+        { id: 'a', text: 'Mencetak "Video call!" ke log melalui debugPrint' },
+        { id: 'b', text: 'Memulai panggilan video sungguhan' },
+        { id: 'c', text: 'Membuka kamera dan meminta izin' },
+        { id: 'd', text: 'Menambahkan pesan video ke ListView' }
       ],
       answer: 'a'
     },
     {
-      id: 'text_input_behavior',
-      question: 'Pengguna mengetik di TextField lalu menekan tombol kirim. Apa yang benar-benar dilakukan kode saat ini?',
+      id: 'phone_action_behavior',
+      question: 'Apa kesimpulan yang tepat tentang tombol telepon pada AppBar?',
       options: [
-        { id: 'a', text: 'Callback hanya menampilkan teks "Mengirim pesan!" melalui debugPrint' },
-        { id: 'b', text: 'Teks otomatis ditambahkan ke ListView pesan' },
-        { id: 'c', text: 'Pesan disimpan ke database lokal' },
-        { id: 'd', text: 'TextField otomatis dikosongkan setelah mengirim' }
+        { id: 'a', text: 'Saat ini tombol hanya mencatat "Telepon!" dan belum melakukan panggilan' },
+        { id: 'b', text: 'Ikon call otomatis menghubungi TemanQ' },
+        { id: 'c', text: 'Tombol mengirim teks dari TextField' },
+        { id: 'd', text: 'Tombol mengganti tab menjadi tab telepon' }
       ],
       answer: 'a'
     },
     {
-      id: 'tab_content',
-      question: 'Tab status dan telepon berisi ListView tanpa children. Apa yang akan dilihat pengguna di tab tersebut?',
+      id: 'empty_tabs_content',
+      question: 'Bagaimana isi tab status dan telepon pada kode HomePage saat ini?',
       options: [
-        { id: 'a', text: 'Area daftar yang belum memiliki item untuk ditampilkan' },
-        { id: 'b', text: 'Daftar chat dari tab pertama secara otomatis' },
-        { id: 'c', text: 'Halaman DetailChat secara otomatis' },
-        { id: 'd', text: 'Error karena ListView harus selalu memiliki children' }
+        { id: 'a', text: 'Keduanya berupa ListView yang belum memiliki isi' },
+        { id: 'b', text: 'Keduanya menampilkan DetailChat secara otomatis' },
+        { id: 'c', text: 'Keduanya berisi Card My Friend' },
+        { id: 'd', text: 'Keduanya memuat riwayat panggilan dari server' }
       ],
       answer: 'a'
     },
     {
-      id: 'displayed_messages',
-      question: 'Dari mana dua gelembung pesan pada DetailChat berasal?',
+      id: 'avatar_widget',
+      question: 'Widget apa yang membentuk avatar bulat dengan ikon person pada AppBar DetailChat?',
       options: [
-        { id: 'a', text: 'Dari widget Text yang ditulis langsung sebagai children ListView' },
-        { id: 'b', text: 'Dari hasil pembacaan TextField' },
-        { id: 'c', text: 'Dari data TabBarController' },
-        { id: 'd', text: 'Dari hasil Navigator.pop' }
-      ],
-      answer: 'a'
-    }
-  ],
-  6: [
-    {
-      id: 'state_on_tap',
-      question: 'Jika daftar pesan ingin bertambah setelah tombol kirim ditekan, perubahan apa yang paling sesuai?',
-      options: [
-        { id: 'a', text: 'Simpan pesan dalam state dan panggil setState agar daftar dibangun ulang' },
-        { id: 'b', text: 'Ganti warna AppBar di dalam debugPrint' },
-        { id: 'c', text: 'Panggil Navigator.pop setiap kali tombol ditekan' },
-        { id: 'd', text: 'Tambahkan tab baru ke DefaultTabController tanpa mengubah TabBar' }
+        { id: 'a', text: 'CircleAvatar' },
+        { id: 'b', text: 'TabBarView' },
+        { id: 'c', text: 'MaterialPageRoute' },
+        { id: 'd', text: 'Expanded' }
       ],
       answer: 'a'
     },
     {
-      id: 'controller_role',
-      question: 'Jika teks yang diketik harus dibaca oleh callback tombol kirim, apa yang belum ada pada implementasi TextField saat ini?',
+      id: 'input_hint',
+      question: 'Apa fungsi hintText "Tulis pesan..." pada InputDecoration?',
       options: [
-        { id: 'a', text: 'Mekanisme untuk mengambil nilai input, misalnya TextEditingController atau onChanged' },
-        { id: 'b', text: 'MaterialPageRoute untuk setiap karakter' },
-        { id: 'c', text: 'TabBarController pada DetailChat' },
-        { id: 'd', text: 'BoxDecoration pada TextField' }
+        { id: 'a', text: 'Memberi petunjuk teks ketika kolom input masih kosong' },
+        { id: 'b', text: 'Mengirim teks tersebut sebagai pesan otomatis' },
+        { id: 'c', text: 'Mengubah ikon tombol menjadi send' },
+        { id: 'd', text: 'Menyimpan isi TextField ke ListView' }
       ],
       answer: 'a'
     },
     {
-      id: 'route_context',
-      question: 'Mengapa context diberikan saat memanggil Navigator.push dan Navigator.pop?',
+      id: 'bubble_colors',
+      question: 'Apa yang membedakan latar dua gelembung pesan pada contoh?',
       options: [
-        { id: 'a', text: 'Navigator menggunakan context untuk menemukan navigator yang mengelola halaman tersebut' },
-        { id: 'b', text: 'Context adalah teks pesan yang akan dikirim' },
-        { id: 'c', text: 'Context menyimpan warna setiap widget' },
-        { id: 'd', text: 'Context menentukan jumlah pilihan pada TabBar' }
+        { id: 'a', text: 'Container memakai Colors.green[100] dan Colors.green[300]' },
+        { id: 'b', text: 'TabBar mengubah warna berdasarkan tab aktif' },
+        { id: 'c', text: 'TextField memilih warna berdasarkan panjang pesan' },
+        { id: 'd', text: 'Navigator memberi warna berbeda untuk setiap route' }
       ],
       answer: 'a'
     },
     {
-      id: 'alignment_scope',
-      question: 'Jika Container pesan tidak dibungkus Align, properti mana yang tidak lagi menentukan posisi gelembung kiri atau kanan pada kode ini?',
+      id: 'alignment_and_color',
+      question: 'Apa yang menentukan sisi tampilan dan warna pada pesan "Hi juga!"?',
       options: [
-        { id: 'a', text: 'Alignment.centerLeft atau Alignment.centerRight' },
-        { id: 'b', text: 'BorderRadius.circular' },
-        { id: 'c', text: 'Colors.green[100]' },
-        { id: 'd', text: 'EdgeInsets.all' }
+        { id: 'a', text: 'Align menentukan posisi kiri, sedangkan BoxDecoration pada Container memberi warna' },
+        { id: 'b', text: 'TextField menentukan posisi, sedangkan AppBar memberi warna pesan' },
+        { id: 'c', text: 'Navigator menentukan posisi, sedangkan TabBar memberi warna pesan' },
+        { id: 'd', text: 'Expanded menentukan keduanya secara otomatis' }
       ],
       answer: 'a'
     },
     {
-      id: 'tab_length_mismatch',
-      question: 'Jika satu tab ditambahkan ke TabBar tetapi length DefaultTabController tetap 3, masalah apa yang harus diperiksa?',
+      id: 'padding_message_list',
+      question: 'Apa pengaruh padding EdgeInsets.all(20) pada ListView pesan?',
       options: [
-        { id: 'a', text: 'Jumlah tab tidak sesuai dengan jumlah yang dikelola controller' },
-        { id: 'b', text: 'Warna pesan harus diganti menjadi biru' },
-        { id: 'c', text: 'Navigator.pop harus dipindahkan ke main.dart' },
-        { id: 'd', text: 'TextField harus dihapus dari DetailChat' }
+        { id: 'a', text: 'Memberi jarak di sekeliling konten daftar pesan' },
+        { id: 'b', text: 'Membatasi daftar hanya boleh memiliki 20 pesan' },
+        { id: 'c', text: 'Menggeser AppBar sejauh 20 tab' },
+        { id: 'd', text: 'Mengatur ukuran ikon kirim menjadi 20 piksel pasti' }
+      ],
+      answer: 'a'
+    },
+    {
+      id: 'static_message_data',
+      question: 'Apa keterbatasan dua pesan yang ditulis langsung sebagai widget pada ListView?',
+      options: [
+        { id: 'a', text: 'Pesan contoh bersifat tetap dan belum berasal dari data yang dapat diperbarui' },
+        { id: 'b', text: 'ListView tidak dapat discroll' },
+        { id: 'c', text: 'Align tidak bisa digunakan di dalam ListView' },
+        { id: 'd', text: 'Container tidak bisa menampilkan Text' }
       ],
       answer: 'a'
     }
   ],
-  7: [
-    {
-      id: 'tab_view_count',
-      question: 'Pengembang menambah tab keempat, tetapi tidak menambah halaman di TabBarView. Apa yang perlu diperbaiki?',
-      options: [
-        { id: 'a', text: 'Tambahkan halaman keempat dan sesuaikan length controller agar jumlahnya konsisten' },
-        { id: 'b', text: 'Hapus MaterialApp agar tab dapat dibuat otomatis' },
-        { id: 'c', text: 'Pindahkan semua actions AppBar ke ListView' },
-        { id: 'd', text: 'Ganti semua StatefulWidget menjadi StatefulWidget baru' }
-      ],
-      answer: 'a'
-    },
-    {
-      id: 'listview_overflow',
-      question: 'Jika Expanded dihapus dari ListView pada Column DetailChat, risiko layout apa yang mungkin muncul?',
-      options: [
-        { id: 'a', text: 'ListView dapat meminta ruang tak terbatas pada arah scroll dan memicu konflik layout' },
-        { id: 'b', text: 'Navigator.pop akan berubah menjadi Navigator.push' },
-        { id: 'c', text: 'TabBar otomatis berpindah ke halaman chat' },
-        { id: 'd', text: 'TextField tidak dapat menerima teks' }
-      ],
-      answer: 'a'
-    },
-    {
-      id: 'send_callback',
-      question: 'Seorang murid menyatakan tombol kirim sudah mengirim pesan karena callback-nya memanggil debugPrint. Evaluasi mana yang tepat?',
-      options: [
-        { id: 'a', text: 'Belum; debugPrint hanya mencatat teks dan tidak mengubah daftar atau mengirim ke layanan' },
-        { id: 'b', text: 'Benar; debugPrint otomatis menyimpan pesan ke ListView' },
-        { id: 'c', text: 'Benar; IconButton mengirim data ke jaringan secara bawaan' },
-        { id: 'd', text: 'Belum; tombol harus diganti menjadi Tab' }
-      ],
-      answer: 'a'
-    },
-    {
-      id: 'row_expanded',
-      question: 'Jika Expanded pada TextField di dalam Row dihapus, apa yang perlu diperhatikan?',
-      options: [
-        { id: 'a', text: 'TextField bisa tidak mendapat batas lebar yang sesuai di Row' },
-        { id: 'b', text: 'DetailChat otomatis kembali ke HomePage' },
-        { id: 'c', text: 'ListView akan berpindah ke AppBar' },
-        { id: 'd', text: 'Warna Container akan menjadi transparan' }
-      ],
-      answer: 'a'
-    },
-    {
-      id: 'navigation_stack',
-      question: 'Setelah Navigator.push membuka DetailChat, aksi mana yang mengembalikan pengguna ke HomePage?',
-      options: [
-        { id: 'a', text: 'Memanggil Navigator.pop dari halaman DetailChat' },
-        { id: 'b', text: 'Menekan IconButton kirim' },
-        { id: 'c', text: 'Memilih tab kedua pada DetailChat' },
-        { id: 'd', text: 'Membuat MaterialPageRoute kedua tanpa pop' }
-      ],
-      answer: 'a'
-    }
-  ],
-  8: [
-    {
-      id: 'tab_controller_scope',
-      question: 'Mengapa DefaultTabController diletakkan membungkus Scaffold HomePage?',
-      options: [
-        { id: 'a', text: 'Agar TabBar dan TabBarView di dalam subtree dapat memakai controller yang sama' },
-        { id: 'b', text: 'Agar DetailChat otomatis menjadi anak TabBarView' },
-        { id: 'c', text: 'Agar semua tombol memperoleh TextEditingController' },
-        { id: 'd', text: 'Agar Scaffold tidak perlu memiliki body' }
-      ],
-      answer: 'a'
-    },
-    {
-      id: 'separation_files',
-      question: 'Apa manfaat memisahkan kelas DetailChat ke file detail_chat.dart?',
-      options: [
-        { id: 'a', text: 'Struktur kode lebih terpisah dan halaman chat dapat diimpor saat dibutuhkan' },
-        { id: 'b', text: 'Flutter otomatis membuat database percakapan' },
-        { id: 'c', text: 'Navigator tidak lagi memerlukan context' },
-        { id: 'd', text: 'Semua widget menjadi StatelessWidget' }
-      ],
-      answer: 'a'
-    },
-    {
-      id: 'input_state_design',
-      question: 'Untuk membuat fitur kirim pesan bekerja di halaman yang sekarang, kombinasi tanggung jawab apa yang perlu ditambahkan?',
-      options: [
-        { id: 'a', text: 'Ambil input, tambahkan pesan ke data yang ditampilkan, lalu perbarui UI' },
-        { id: 'b', text: 'Ubah warna AppBar dan tambah satu tab kosong' },
-        { id: 'c', text: 'Panggil Navigator.pop sebelum membaca input' },
-        { id: 'd', text: 'Ganti ListView dengan IconButton tanpa data' }
-      ],
-      answer: 'a'
-    },
-    {
-      id: 'home_state_design',
-      question: 'Jika HomePage akan menampilkan jumlah pesan belum dibaca yang berubah, pendekatan apa yang selaras dengan desain Flutter pada kode ini?',
-      options: [
-        { id: 'a', text: 'Kelola nilai yang berubah sebagai state lalu bangun ulang bagian UI terkait' },
-        { id: 'b', text: 'Tulis nilai baru ke dalam nama file detail_chat.dart' },
-        { id: 'c', text: 'Ubah jumlah TabBarView agar menjadi jumlah pesan' },
-        { id: 'd', text: 'Gunakan BorderRadius untuk menyimpan jumlah' }
-      ],
-      answer: 'a'
-    },
-    {
-      id: 'message_list_data',
-      question: 'Apa keterbatasan utama ListView pesan yang ditulis dengan dua Text tetap?',
-      options: [
-        { id: 'a', text: 'Isinya statis dan belum dibangun dari kumpulan pesan yang dapat berubah' },
-        { id: 'b', text: 'ListView tidak dapat menampilkan Text' },
-        { id: 'c', text: 'Align hanya bekerja di dalam AppBar' },
-        { id: 'd', text: 'Container tidak dapat memiliki BoxDecoration' }
-      ],
-      answer: 'a'
-    }
-  ],
-  9: [
-    {
-      id: 'stateless_refactor',
-      question: 'Jika DetailChat tetap hanya menampilkan dua pesan tetap dan tidak mengelola data berubah, refaktor mana yang paling sederhana?',
-      options: [
-        { id: 'a', text: 'Pertimbangkan StatelessWidget karena belum ada state lokal yang berubah' },
-        { id: 'b', text: 'Tambahkan tiga DefaultTabController bersarang' },
-        { id: 'c', text: 'Pindahkan semua pesan ke properti actions AppBar' },
-        { id: 'd', text: 'Hapus Scaffold dan gunakan Navigator sebagai widget tampilan' }
-      ],
-      answer: 'a'
-    },
-    {
-      id: 'debugprint_limit',
-      question: 'Jika log "Video call!" muncul, kesimpulan apa yang dapat dibuat dari kode?',
-      options: [
-        { id: 'a', text: 'Callback tombol berjalan dan mencatat teks, tetapi panggilan video nyata belum dibuat' },
-        { id: 'b', text: 'Video call berhasil tersambung ke kontak' },
-        { id: 'c', text: 'Aplikasi sudah meminta izin kamera' },
-        { id: 'd', text: 'Pesan video tersimpan di ListView' }
-      ],
-      answer: 'a'
-    },
-    {
-      id: 'tab_empty_state',
-      question: 'Apa perubahan yang paling tepat agar tab status yang kosong memberi informasi kepada pengguna?',
-      options: [
-        { id: 'a', text: 'Tambahkan widget konten atau empty state sebagai isi tab tersebut' },
-        { id: 'b', text: 'Tambah Navigator.pop ke setiap item ListView kosong' },
-        { id: 'c', text: 'Hapus TabBarView tetapi pertahankan tiga tab' },
-        { id: 'd', text: 'Pindahkan TextField ke dalam DefaultTabController' }
-      ],
-      answer: 'a'
-    },
-    {
-      id: 'send_input_flow',
-      question: 'Apa yang masih dibutuhkan agar tombol kirim dapat menambahkan teks yang diketik ke daftar pesan?',
-      options: [
-        { id: 'a', text: 'Baca nilai TextField, kelola koleksi pesan, lalu perbarui UI saat koleksi berubah' },
-        { id: 'b', text: 'Ubah Icon.send menjadi Icon.call' },
-        { id: 'c', text: 'Tambahkan TabBar ke dalam ListView pesan' },
-        { id: 'd', text: 'Panggil debugPrint tanpa membaca nilai input' }
-      ],
-      answer: 'a'
-    },
-    {
-      id: 'route_builder',
-      question: 'Apa peran MaterialPageRoute pada callback kartu percakapan?',
-      options: [
-        { id: 'a', text: 'Menyediakan route yang membangun widget DetailChat untuk Navigator.push' },
-        { id: 'b', text: 'Menentukan urutan pesan pada ListView' },
-        { id: 'c', text: 'Mengatur warna TabBar saat route ditutup' },
-        { id: 'd', text: 'Membaca isi TextField sebelum berpindah halaman' }
-      ],
-      answer: 'a'
-    }
-  ],
-  10: [
-    {
-      id: 'chat_feature_design',
-      question: 'Manakah urutan rancangan yang paling lengkap untuk membuat tombol kirim menampilkan pesan baru di halaman chat?',
-      options: [
-        { id: 'a', text: 'Ambil teks input, validasi bila perlu, tambahkan ke data pesan, lalu bangun ulang daftar' },
-        { id: 'b', text: 'Ubah warna AppBar, panggil Navigator.pop, lalu cetak teks tetap' },
-        { id: 'c', text: 'Tambah tab baru, hapus TextField, lalu ubah BorderRadius' },
-        { id: 'd', text: 'Panggil MaterialPageRoute setiap kali satu karakter diketik' }
-      ],
-      answer: 'a'
-    },
-    {
-      id: 'screen_structure',
-      question: 'Jika halaman chat perlu mempertahankan area input di bawah sementara daftar pesan dapat discroll, susunan mana yang paling sesuai dengan kode?',
-      options: [
-        { id: 'a', text: 'Column berisi Expanded(ListView) di atas dan area input di bawah' },
-        { id: 'b', text: 'Row berisi AppBar dan Navigator.pop tanpa body' },
-        { id: 'c', text: 'ListView membungkus Scaffold dan TabBar' },
-        { id: 'd', text: 'TabBarView berisi TextField sebagai satu-satunya halaman' }
-      ],
-      answer: 'a'
-    },
-    {
-      id: 'tab_feature_extension',
-      question: 'Saat menambahkan tab baru untuk fitur lain, perubahan mana yang menjaga struktur tab tetap konsisten?',
-      options: [
-        { id: 'a', text: 'Tambah Tab, tambah halaman TabBarView pada posisi yang sesuai, dan perbarui length controller' },
-        { id: 'b', text: 'Tambah IconButton ke actions DetailChat saja' },
-        { id: 'c', text: 'Ubah jumlah gelembung pesan tanpa menyentuh controller' },
-        { id: 'd', text: 'Hapus TabBarView dan biarkan controller mengisi konten otomatis' }
-      ],
-      answer: 'a'
-    },
-    {
-      id: 'feature_completion',
-      question: 'Manakah pernyataan yang paling akurat tentang tingkat fungsi aplikasi pada kode lampiran?',
-      options: [
-        { id: 'a', text: 'Navigasi dan tampilan dasar sudah ada, tetapi pengiriman pesan dan panggilan nyata belum diimplementasikan' },
-        { id: 'b', text: 'Semua fitur chat sudah terhubung ke server karena memakai StatefulWidget' },
-        { id: 'c', text: 'Tab kosong berarti aplikasi otomatis mengambil data status dari internet' },
-        { id: 'd', text: 'Tombol panggilan bekerja karena menggunakan Icon.call' }
-      ],
-      answer: 'a'
-    },
-    {
-      id: 'architecture_reasoning',
-      question: 'Mengapa memisahkan tanggung jawab tampilan, input, data pesan, dan navigasi membantu pengembangan lanjutan?',
-      options: [
-        { id: 'a', text: 'Perubahan tiap bagian lebih mudah dipahami dan diuji tanpa mencampur semua perilaku di satu callback' },
-        { id: 'b', text: 'Pemisahan membuat aplikasi tidak lagi membutuhkan widget' },
-        { id: 'c', text: 'Pemisahan otomatis membuat panggilan video berfungsi' },
-        { id: 'd', text: 'Semua data akan tersimpan permanen tanpa penyimpanan' }
-      ],
-      answer: 'a'
-    }
-  ]
 };
 
 function doGet(event) {
@@ -731,12 +719,14 @@ function getParticipantLevelProgress_(nis) {
   return Array.from({ length: EXAM_CONFIG.levelCount }, (_, index) => {
     const id = index + 1;
     const scores = scoresByLevel.get(id) || [];
+    const available = getExamQuestions_(id).length > 0;
     return {
       id,
-      available: getExamQuestions_(id).length > 0,
+      available,
+      questionCount: getExamQuestions_(id).length,
       attempts: scores.length,
       highestScore: scores.length ? Math.max(...scores) : null,
-      passed: scores.some(score => score >= EXAM_CONFIG.passingScore)
+      passed: available && scores.some(score => score >= EXAM_CONFIG.passingScore)
     };
   });
 }

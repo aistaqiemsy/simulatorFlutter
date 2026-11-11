@@ -638,7 +638,7 @@ class _CounterPageState extends State<CounterPage> {
                                             <h2 className="mt-3 text-xl font-extrabold tracking-tight">Siap uji pemahamanmu?</h2>
                                             <p className="mt-1 max-w-lg text-sm leading-relaxed text-indigo-100">Tunjukkan pemahamanmu tentang widget, layout, state, dan langkah membangun aplikasi.</p>
                                             <div className="mt-4 flex flex-wrap gap-2">
-                                                <span className="rounded-lg border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold">10 level bertahap · 55 soal</span>
+                                                <span className="rounded-lg border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold">Level 1: 10 soal · Level 2–4: 15 soal</span>
                                                 <span className="rounded-lg border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold">Nilai minimum 75</span>
                                             </div>
                                         </div>
@@ -725,10 +725,10 @@ class _CounterPageState extends State<CounterPage> {
                                                                         {!level.available
                                                                             ? 'Soal segera hadir'
                                                                             : level.passed
-                                                                                ? `Badge diperoleh · nilai ${level.highestScore}`
+                                                                                ? `${level.questionCount} soal · Badge diperoleh · nilai ${level.highestScore}`
                                                                                 : level.attempts
-                                                                                    ? `Nilai tertinggi ${level.highestScore} · ulangi`
-                                                                                    : 'Belum dikerjakan'}
+                                                                                    ? `${level.questionCount} soal · Nilai tertinggi ${level.highestScore} · ulangi`
+                                                                                    : `${level.questionCount} soal · Belum dikerjakan`}
                                                                     </span>
                                                                 </button>
                                                             ))}
