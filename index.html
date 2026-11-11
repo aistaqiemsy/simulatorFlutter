@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flutter Edu Simulator - Rich Widgets</title>
+    <title>Lab Pemrograman Flutter untuk Pemula</title>
     <!-- React & ReactDOM -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
@@ -13,7 +13,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
-        .phone-mockup { width: 340px; height: 680px; border: 14px solid #1e293b; border-radius: 40px; overflow: hidden; position: relative; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); background-color: white; display: flex; flex-direction: column; transition: all 0.3s ease; }
+        .phone-mockup { width: min(340px, 100%); height: min(680px, calc(100vh - 2rem)); min-height: 480px; border: 14px solid #1e293b; border-radius: 40px; overflow: hidden; position: relative; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); background-color: white; display: flex; flex-direction: column; transition: all 0.3s ease; }
         .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 25px; background-color: #1e293b; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; z-index: 50; }
         .flash-render { animation: flashBg 0.6s ease-out; }
         @keyframes flashBg { 0% { background-color: rgba(74, 222, 128, 0.7); box-shadow: 0 0 15px rgba(74,222,128,0.5); } 100% { background-color: transparent; box-shadow: none; } }
@@ -33,10 +33,44 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState } = React;
+
+        const DndStatelessCard = ({ onDragOver, onDrop, showAlert }) => {
+            const [isShaking, setIsShaking] = useState(false);
+            const handleClick = (e) => {
+                e.stopPropagation();
+                setIsShaking(true);
+                showAlert("StatelessWidget tidak menyimpan state lokal. Ubah data/properti dari parent untuk mengubah tampilannya.");
+                setTimeout(() => setIsShaking(false), 400);
+            };
+            return (
+                <div onDragOver={onDragOver} onDrop={onDrop} className={`bg-white border-2 border-dashed border-red-300 p-3 rounded-lg shadow-sm my-1 mx-2 text-center transition-transform ${isShaking ? 'shake-animation border-red-500 bg-red-50' : ''}`}>
+                    <div className="text-[10px] font-bold text-red-600 mb-2 uppercase tracking-wide">🧊 Stateless Card</div>
+                    <button onClick={handleClick} className="bg-red-100 hover:bg-red-200 text-red-700 text-xs px-3 py-1.5 rounded border border-red-300 shadow-sm transition">Coba Ubah Tampilan</button>
+                </div>
+            );
+        };
+
+        const DndStatefulCounter = ({ onDragOver, onDrop }) => {
+            const [likes, setLikes] = useState(0);
+            const [isFlashing, setIsFlashing] = useState(false);
+            const handleClick = (e) => {
+                e.stopPropagation(); setLikes(prev => prev + 1); setIsFlashing(true);
+                setTimeout(() => setIsFlashing(false), 600);
+            };
+            return (
+                <div onDragOver={onDragOver} onDrop={onDrop} className={`bg-white border-2 border-dashed border-green-300 p-3 rounded-lg shadow-sm my-1 mx-2 text-center transition-colors duration-300 ${isFlashing ? 'flash-render border-green-500' : ''}`}>
+                    <div className="text-[10px] font-bold text-green-600 mb-2 uppercase tracking-wide">🔋 Stateful Counter</div>
+                    <div className="flex items-center justify-center gap-3">
+                        <span className="text-lg font-bold text-slate-700">{likes}</span>
+                        <button onClick={handleClick} className="bg-pink-100 hover:bg-pink-200 text-pink-600 text-sm px-3 py-1 rounded-full border border-pink-300 shadow-sm flex items-center gap-1">❤️ Like</button>
+                    </div>
+                </div>
+            );
+        };
 
         function App() {
-            const [activeMode, setActiveMode] = useState('dnd'); 
+            const [activeMode, setActiveMode] = useState('basic');
 
             // --- STATE: MODE 1 (Basic & Hot Reload) ---
             const [widgetsBasic, setWidgetsBasic] = useState([]);
@@ -44,9 +78,12 @@
             const [draftTitle, setDraftTitle] = useState('Flutter App');
             const [activeColor, setActiveColor] = useState('bg-blue-600');
             const [activeTitle, setActiveTitle] = useState('Flutter App');
+            const [basicCount, setBasicCount] = useState(0);
+            const [basicDragOver, setBasicDragOver] = useState(false);
 
             // --- STATE: MODE 2 (Drag & Drop) ---
             const [elementsDnd, setElementsDnd] = useState([{ id: 'root', type: 'ScaffoldBody', parentId: null }]);
+            const [builderTargetId, setBuilderTargetId] = useState('root');
             const [dragOverId, setDragOverId] = useState(null);
             const [alertMsg, setAlertMsg] = useState(null);
 
@@ -55,57 +92,290 @@
             const [likesTheory, setLikesTheory] = useState(0);
             const [isStatefulFlashing, setIsStatefulFlashing] = useState(false);
             const [isStatelessFlashing, setIsStatelessFlashing] = useState(false);
-            const [statelessErrorShake, setStatelessErrorShake] = useState(false);
+
+            // --- STATE: UJIAN ---
+            const [examEndpoint, setExamEndpoint] = useState(() => {
+                try { return localStorage.getItem('flutterExamEndpoint') || ''; }
+                catch (error) { return ''; }
+            });
+            const [examEndpointDraft, setExamEndpointDraft] = useState(() => {
+                try { return localStorage.getItem('flutterExamEndpoint') || ''; }
+                catch (error) { return ''; }
+            });
+            const [examNis, setExamNis] = useState('');
+            const [examQuestions, setExamQuestions] = useState([]);
+            const [examAnswers, setExamAnswers] = useState({});
+            const [examStatus, setExamStatus] = useState('locked');
+            const [examDialogOpen, setExamDialogOpen] = useState(false);
+            const [examLoading, setExamLoading] = useState(false);
+            const [examError, setExamError] = useState('');
+            const [examResult, setExamResult] = useState(null);
 
             // --- FUNGSI GLOBAL ---
             const showAlert = (msg) => {
                 setAlertMsg(msg);
                 setTimeout(() => setAlertMsg(null), 4500);
             };
+            const requestExamApi = (parameters) => new Promise((resolve, reject) => {
+                let endpoint;
+                try {
+                    endpoint = new URL(examEndpoint);
+                } catch (error) {
+                    reject(new Error('Alamat backend belum diatur. Buka Pengaturan koneksi Google Sheets.'));
+                    return;
+                }
+                if (endpoint.protocol !== 'https:' || endpoint.hostname !== 'script.google.com' || !/^\/macros\/s\/[^/]+\/exec$/.test(endpoint.pathname)) {
+                    reject(new Error('Alamat backend harus berupa URL web app Google Apps Script yang berakhiran /exec.'));
+                    return;
+                }
 
-            // --- KOMPONEN KHUSUS STATE ---
-            const DndStatelessCard = ({ onDragOver, onDrop }) => {
-                const [isShaking, setIsShaking] = useState(false);
-                const handleClick = (e) => {
-                    e.stopPropagation();
-                    setIsShaking(true);
-                    showAlert("🚫 ERROR: StatelessWidget tidak memiliki setState(). Kamu tidak bisa mengubahnya setelah di-render!");
-                    setTimeout(() => setIsShaking(false), 400);
+                const callbackName = `flutterLabCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+                const script = document.createElement('script');
+                let timeoutId;
+                const cleanup = () => {
+                    clearTimeout(timeoutId);
+                    delete window[callbackName];
+                    script.remove();
                 };
-                return (
-                    <div onDragOver={onDragOver} onDrop={onDrop} className={`bg-white border-2 border-dashed border-red-300 p-3 rounded-lg shadow-sm my-1 mx-2 text-center transition-transform ${isShaking ? 'shake-animation border-red-500 bg-red-50' : ''}`}>
-                        <div className="text-[10px] font-bold text-red-600 mb-2 uppercase tracking-wide">🧊 Stateless Card</div>
-                        <button onClick={handleClick} className="bg-red-100 hover:bg-red-200 text-red-700 text-xs px-3 py-1.5 rounded border border-red-300 shadow-sm transition">Coba Ubah Tampilan</button>
-                    </div>
-                );
+                window[callbackName] = (response) => {
+                    cleanup();
+                    resolve(response);
+                };
+                script.onerror = () => {
+                    cleanup();
+                    reject(new Error('Tidak dapat menghubungi backend ujian. Periksa URL dan publikasi Apps Script.'));
+                };
+                endpoint.searchParams.set('callback', callbackName);
+                Object.entries(parameters).forEach(([key, value]) => endpoint.searchParams.set(key, String(value)));
+                timeoutId = setTimeout(() => {
+                    cleanup();
+                    reject(new Error('Backend tidak merespons. Coba lagi atau periksa koneksi Google Sheets.'));
+                }, 20000);
+                script.src = endpoint.toString();
+                document.head.appendChild(script);
+            });
+            const saveExamEndpoint = () => {
+                try {
+                    const endpoint = new URL(examEndpointDraft.trim());
+                    if (endpoint.protocol !== 'https:' || endpoint.hostname !== 'script.google.com' || !/^\/macros\/s\/[^/]+\/exec$/.test(endpoint.pathname)) {
+                        throw new Error('Gunakan URL web app Google Apps Script yang berakhiran /exec.');
+                    }
+                    localStorage.setItem('flutterExamEndpoint', endpoint.toString());
+                    setExamEndpoint(endpoint.toString());
+                    setExamEndpointDraft(endpoint.toString());
+                    setExamError('');
+                    showAlert('Koneksi backend ujian tersimpan di browser ini.');
+                } catch (error) {
+                    setExamError(error.message === 'Invalid URL' ? 'URL backend tidak valid.' : error.message);
+                }
             };
-
-            const DndStatefulCounter = ({ onDragOver, onDrop }) => {
-                const [likes, setLikes] = useState(0);
-                const [isFlashing, setIsFlashing] = useState(false);
-                const handleClick = (e) => {
-                    e.stopPropagation(); setLikes(likes + 1); setIsFlashing(true);
-                    setTimeout(() => setIsFlashing(false), 600);
-                };
-                return (
-                    <div onDragOver={onDragOver} onDrop={onDrop} className={`bg-white border-2 border-dashed border-green-300 p-3 rounded-lg shadow-sm my-1 mx-2 text-center transition-colors duration-300 ${isFlashing ? 'flash-render border-green-500' : ''}`}>
-                        <div className="text-[10px] font-bold text-green-600 mb-2 uppercase tracking-wide">🔋 Stateful Counter</div>
-                        <div className="flex items-center justify-center gap-3">
-                            <span className="text-lg font-bold text-slate-700">{likes}</span>
-                            <button onClick={handleClick} className="bg-pink-100 hover:bg-pink-200 text-pink-600 text-sm px-3 py-1 rounded-full border border-pink-300 shadow-sm flex items-center gap-1">❤️ Like</button>
-                        </div>
-                    </div>
-                );
+            const startExam = async (event) => {
+                event.preventDefault();
+                setExamLoading(true);
+                setExamError('');
+                setExamResult(null);
+                try {
+                    const response = await requestExamApi({ action: 'start', nis: examNis.trim() });
+                    if (!response.success) throw new Error(response.message || 'NIS tidak dapat diverifikasi.');
+                    setExamQuestions(response.questions);
+                    setExamAnswers({});
+                    setExamStatus('inProgress');
+                    setExamDialogOpen(false);
+                } catch (error) {
+                    setExamStatus('locked');
+                    setExamError(error.message);
+                } finally {
+                    setExamLoading(false);
+                }
+            };
+            const submitExam = async () => {
+                if (examQuestions.some(question => !examAnswers[question.id])) {
+                    setExamError('Jawab semua soal sebelum mengirim ujian.');
+                    return;
+                }
+                setExamLoading(true);
+                setExamError('');
+                try {
+                    const response = await requestExamApi({
+                        action: 'submit',
+                        nis: examNis.trim(),
+                        answers: JSON.stringify(examAnswers)
+                    });
+                    if (!response.success) throw new Error(response.message || 'Jawaban belum dapat disimpan.');
+                    setExamResult(response);
+                    setExamStatus('completed');
+                } catch (error) {
+                    setExamError(error.message);
+                } finally {
+                    setExamLoading(false);
+                }
+            };
+            const resetExam = () => {
+                setExamStatus('locked');
+                setExamDialogOpen(false);
+                setExamQuestions([]);
+                setExamAnswers({});
+                setExamResult(null);
+                setExamError('');
+            };
+            const openExam = () => {
+                setActiveMode('exam');
+                if (examStatus === 'locked') {
+                    setExamError('');
+                    setExamDialogOpen(true);
+                }
             };
 
             // --- FUNGSI MODE 1 ---
-            const addWidgetBasic = (type) => setWidgetsBasic([...widgetsBasic, { id: Date.now(), type }]);
+            const addWidgetBasic = (type) => setWidgetsBasic(prev => [...prev, { id: `${Date.now()}-${prev.length}`, type }]);
+            const handleBasicDragStart = (event, type) => {
+                event.dataTransfer.setData('basicWidgetType', type);
+                event.dataTransfer.effectAllowed = 'copy';
+            };
+            const handleBasicDrop = (event) => {
+                event.preventDefault();
+                setBasicDragOver(false);
+                const type = event.dataTransfer.getData('basicWidgetType');
+                if (['Text', 'ElevatedButton', 'Icon'].includes(type)) addWidgetBasic(type);
+            };
             const clearWidgetsBasic = () => setWidgetsBasic([]);
             const triggerHotReload = () => { setActiveColor(draftColor); setActiveTitle(draftTitle); };
+            const dartString = (value) => JSON.stringify(value).replace(/\$/g, '\\$');
+            const renderDartNode = (node) => {
+                const children = elementsDnd.filter(el => el.parentId === node.id);
+                const child = children.length ? renderDartNode(children[0]) : 'const SizedBox.shrink()';
+                const childList = children.map(renderDartNode).join(',\n');
+                switch (node.type) {
+                    case 'Column': return `Column(children: [\n${childList}\n])`;
+                    case 'Row': return `Row(children: [\n${childList}\n])`;
+                    case 'ListView': return `ListView(shrinkWrap: true, children: [\n${childList}\n])`;
+                    case 'Container': return `Container(padding: const EdgeInsets.all(12), child: ${child})`;
+                    case 'Padding': return `Padding(padding: const EdgeInsets.all(16), child: ${child})`;
+                    case 'Center': return `Center(child: ${child})`;
+                    case 'Card': return `Card(child: ${child})`;
+                    case 'Text': return `const Text('Halo, Flutter!')`;
+                    case 'ElevatedButton': return `ElevatedButton(onPressed: () {}, child: const Text('Simpan Data'))`;
+                    case 'Icon': return `const Icon(Icons.star, color: Colors.blue)`;
+                    case 'Image': return `Image.network('https://picsum.photos/300/100', fit: BoxFit.cover)`;
+                    case 'FlutterLogo': return `const FlutterLogo(size: 48)`;
+                    case 'TextField': return `const TextField(decoration: InputDecoration(hintText: 'Ketik sesuatu...'))`;
+                    case 'StatelessCard': return `const Card(child: Padding(padding: EdgeInsets.all(12), child: Text('Stateless: tampilan dari parent')))`;
+                    case 'StatefulCounter': return `ElevatedButton(onPressed: () {}, child: const Text('Stateful Counter (lihat tab Teori State)'))`;
+                    default: return 'const SizedBox.shrink()';
+                }
+            };
+            const getBuilderCode = () => {
+                const children = elementsDnd.filter(el => el.parentId === 'root');
+                const body = children.length === 0
+                    ? 'const Center(child: Text(\'Tarik widget ke area body\'))'
+                    : children.length === 1
+                        ? renderDartNode(children[0])
+                        : `Column(children: [\n${children.map(renderDartNode).join(',\n')}\n])`;
+                return `import 'package:flutter/material.dart';
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Pemula',
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Flutter App')),
+        body: ${body},
+      ),
+    );
+  }
+}`;
+            };
+            const copyBuilderCode = () => {
+                navigator.clipboard.writeText(getBuilderCode())
+                    .then(() => showAlert('Kode Flutter berhasil disalin. Tempelkan ke lib/main.dart.'))
+                    .catch(() => showAlert('Clipboard tidak tersedia. Pilih dan salin kode secara manual.'));
+            };
+            const getStarterCode = () => {
+                const seedColor = {
+                    'bg-blue-600': 'Colors.blue',
+                    'bg-emerald-600': 'Colors.green',
+                    'bg-violet-600': 'Colors.deepPurple',
+                    'bg-rose-600': 'Colors.pink'
+                }[activeColor] || 'Colors.blue';
+                return `import 'package:flutter/material.dart';
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+    title: ${dartString(activeTitle)},
+    theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: ${seedColor})),
+    home: const CounterPage(),
+  );
+}
+
+class CounterPage extends StatefulWidget {
+  const CounterPage({super.key});
+
+  @override
+  State<CounterPage> createState() => _CounterPageState();
+}
+
+class _CounterPageState extends State<CounterPage> {
+  int _count = 0;
+
+  void _increment() => setState(() => _count++);
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: Text(${dartString(activeTitle)})),
+    body: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('Tombol ditekan sebanyak:'),
+          Text('$_count', style: Theme.of(context).textTheme.headlineMedium),
+          ElevatedButton(onPressed: _increment, child: const Text('Tambah')),
+        ],
+      ),
+    ),
+  );
+}`;
+            };
+            const copyStarterCode = () => {
+                navigator.clipboard.writeText(getStarterCode())
+                    .then(() => showAlert('Kode aplikasi counter berhasil disalin ke clipboard.'))
+                    .catch(() => showAlert('Clipboard tidak tersedia. Pilih dan salin kode secara manual.'));
+            };
 
             // --- FUNGSI MODE 2 ---
-            const clearTreeDnd = () => setElementsDnd([{ id: 'root', type: 'ScaffoldBody', parentId: null }]);
+            const clearTreeDnd = () => {
+                setElementsDnd([{ id: 'root', type: 'ScaffoldBody', parentId: null }]);
+                setBuilderTargetId('root');
+            };
             const handleDragStart = (e, type) => e.dataTransfer.setData('widgetType', type);
+            const leafWidgets = ['Text', 'ElevatedButton', 'Icon', 'Image', 'FlutterLogo', 'TextField', 'StatelessCard', 'StatefulCounter'];
+            const singleChildWidgets = ['Container', 'Padding', 'Center', 'Card'];
+            const addChildWidget = (parentId, type) => {
+                const parent = elementsDnd.find(el => el.id === parentId);
+                const parentType = parent ? parent.type : 'ScaffoldBody';
+                const children = elementsDnd.filter(el => el.parentId === parentId);
+                if (leafWidgets.includes(parentType)) {
+                    showAlert(`🚨 ERROR: Widget '${parentType}' adalah LEAF NODE. Tidak bisa diisi child di dalamnya.`);
+                    return;
+                }
+                if (singleChildWidgets.includes(parentType) && children.length >= 1) {
+                    showAlert(`⚠️ ERROR: Widget '${parentType}' hanya menerima satu child. Pilih body atau layout lain.`);
+                    return;
+                }
+                const id = `${Date.now()}-${elementsDnd.length}`;
+                setElementsDnd(prev => [...prev, { id, type, parentId }]);
+                if (['Column', 'Row', 'ListView', ...singleChildWidgets].includes(type)) setBuilderTargetId(id);
+            };
+            const addWidgetToTarget = (type) => addChildWidget(builderTargetId, type);
 
             const renderNode = (node) => {
                 const children = elementsDnd.filter(el => el.parentId === node.id);
@@ -119,20 +389,7 @@
                     if (!draggedType) return;
                     
                     // Kategori Widget
-                    const leafWidgets = ['Text', 'ElevatedButton', 'Icon', 'Image', 'FlutterLogo', 'TextField', 'StatelessCard', 'StatefulCounter'];
-                    const singleChildWidgets = ['Container', 'Padding', 'Center', 'Card'];
-                    
-                    // Validasi 1: Leaf nodes
-                    if (leafWidgets.includes(node.type)) {
-                        showAlert(`🚨 ERROR: Widget '${node.type}' adalah LEAF NODE. Tidak bisa diisi child di dalamnya.`);
-                        return;
-                    }
-                    // Validasi 2: Single-child nodes
-                    if (singleChildWidgets.includes(node.type) && children.length >= 1) {
-                        showAlert(`⚠️ ERROR: Widget '${node.type}' hanya menerima properti 'child' (maksimal 1 elemen). Gunakan Column/Row/ListView untuk 'children'.`);
-                        return;
-                    }
-                    setElementsDnd([...elementsDnd, { id: Date.now().toString(), type: draggedType, parentId: node.id }]);
+                    addChildWidget(node.id, draggedType);
                 };
 
                 const baseClasses = "relative transition-colors duration-200 rounded m-1 cursor-default border-2 border-dashed";
@@ -168,7 +425,7 @@
                     case 'Image': return <div key={node.id} className="bg-gray-200 rounded mx-2 my-1 h-20 flex items-center justify-center text-gray-500 text-xs border border-gray-300 overflow-hidden" onDragOver={onDragOver} onDrop={onDrop}><img src="https://via.placeholder.com/300x100?text=Image.network()" className="w-full h-full object-cover" /></div>;
                     
                     // State Components
-                    case 'StatelessCard': return <DndStatelessCard key={node.id} onDragOver={onDragOver} onDrop={onDrop} />;
+                    case 'StatelessCard': return <DndStatelessCard key={node.id} onDragOver={onDragOver} onDrop={onDrop} showAlert={showAlert} />;
                     case 'StatefulCounter': return <DndStatefulCounter key={node.id} onDragOver={onDragOver} onDrop={onDrop} />;
                     default: return null;
                 }
@@ -185,18 +442,25 @@
             const forceParentRebuild = () => { setParentData(prev => prev + 1); setIsStatelessFlashing(true); setIsStatefulFlashing(true); setTimeout(() => { setIsStatelessFlashing(false); setIsStatefulFlashing(false); }, 600); };
 
             return (
-                <div className="flex flex-col md:flex-row h-screen w-full overflow-hidden relative">
+                <div className="flex flex-col md:flex-row min-h-screen md:h-screen w-full md:overflow-hidden relative">
                     {/* CUSTOM ALERT BANNER */}
                     {alertMsg && (<div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 alert-toast bg-red-600 text-white px-6 py-3 rounded-lg shadow-2xl border-2 border-white flex items-center gap-3 w-[90%] md:w-auto font-medium"><span className="text-2xl">⚠️</span> {alertMsg}</div>)}
 
                     {/* PANEL KIRI */}
-                    <div className="w-full md:w-3/5 p-6 overflow-y-auto bg-white shadow-xl z-10 border-r border-gray-200 flex flex-col">
-                        <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2 flex items-center gap-2"><span className="text-blue-500">Flutter</span> EduSimulator <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded ml-2">RICH</span></h1>
+                    <div className="w-full md:w-3/5 p-4 md:p-6 md:overflow-y-auto bg-white shadow-xl z-10 border-r border-gray-200 flex flex-col">
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                            <h1 className="min-w-0 text-xl md:text-3xl font-bold text-slate-800 flex flex-wrap items-center gap-2"><span className="text-blue-500">Flutter</span> EduSimulator <span className="bg-blue-600 text-white text-[10px] px-2 py-1 rounded">LAB PEMULA</span></h1>
+                            <button onClick={openExam} className="group relative shrink-0 overflow-hidden rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2.5 font-bold text-white shadow-lg shadow-indigo-300/60 transition hover:-translate-y-0.5 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-indigo-200">
+                                <span className="absolute inset-0 bg-white/10 opacity-0 transition group-hover:opacity-100"></span>
+                                <span className="relative flex items-center gap-1.5 whitespace-nowrap"><span aria-hidden="true">✦</span> Mulai Ujian</span>
+                            </button>
+                        </div>
+                        <p className="text-sm text-slate-600 mb-4">Belajar bertahap: ubah properti, susun widget, pahami state, lalu jalankan aplikasi Flutter pertamamu.</p>
                         
                         <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-lg">
-                            <button onClick={() => setActiveMode('basic')} className={`flex-1 py-2 px-2 text-xs md:text-sm font-bold rounded-md transition ${activeMode === 'basic' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>⚡ Basic Reload</button>
-                            <button onClick={() => setActiveMode('dnd')} className={`flex-1 py-2 px-2 text-xs md:text-sm font-bold rounded-md transition ${activeMode === 'dnd' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>🏗️ Advanced Builder</button>
-                            <button onClick={() => setActiveMode('state')} className={`flex-1 py-2 px-2 text-xs md:text-sm font-bold rounded-md transition ${activeMode === 'state' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>🔄 Teori State</button>
+                            <button onClick={() => setActiveMode('basic')} className={`flex-1 py-2 px-2 text-xs md:text-sm font-bold rounded-md transition ${activeMode === 'basic' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>1. Dasar</button>
+                            <button onClick={() => setActiveMode('dnd')} className={`flex-1 py-2 px-2 text-xs md:text-sm font-bold rounded-md transition ${activeMode === 'dnd' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>2. Susun UI</button>
+                            <button onClick={() => setActiveMode('state')} className={`flex-1 py-2 px-2 text-xs md:text-sm font-bold rounded-md transition ${activeMode === 'state' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>3. State</button>
                         </div>
 
                         <div className="flex-1 overflow-y-auto pr-2">
@@ -204,17 +468,18 @@
                             {activeMode === 'dnd' && (
                                 <div className="animate-[fade-in_0.3s_ease-out]">
                                     <p className="text-xs text-gray-600 mb-4 bg-blue-50 p-3 rounded border border-blue-200">
-                                        <b>Instruksi:</b> Drag komponen di bawah ke layar HP. 
-                                        Uji validasi properti <code>child:</code> (maksimal 1 elemen) versus <code>children: [ ]</code> (banyak elemen).
+                                        <b>Instruksi:</b>                                         Susun tampilan dengan menarik widget atau mengetuk tombol tambah. Coba letakkan beberapa widget di <code>Column</code> (children) lalu satu widget di <code>Container</code> (child).
                                     </p>
+                                    <div className="flex items-center justify-between gap-2 text-xs mb-4 bg-slate-50 border rounded p-3">
+                                        <span>Tujuan tambah: <b>{builderTargetId === 'root' ? 'Scaffold body' : elementsDnd.find(el => el.id === builderTargetId).type}</b></span>
+                                        <button onClick={() => setBuilderTargetId('root')} className="shrink-0 rounded border bg-white px-2 py-1 hover:bg-slate-100">Pilih body utama</button>
+                                    </div>
                                     
                                     {/* KATEGORI: MULTI-CHILD */}
                                     <div className="mb-4">
                                         <h3 className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">📚 Multi-Child Layout (children:[])</h3>
                                         <div className="grid grid-cols-3 gap-2">
-                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Column')} className="cursor-grab bg-blue-100 p-2 text-center rounded border border-blue-300 shadow-sm font-bold text-xs text-blue-800">⬇️ Column</div>
-                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Row')} className="cursor-grab bg-green-100 p-2 text-center rounded border border-green-300 shadow-sm font-bold text-xs text-green-800">➡️ Row</div>
-                                            <div draggable onDragStart={(e) => handleDragStart(e, 'ListView')} className="cursor-grab bg-orange-100 p-2 text-center rounded border border-orange-300 shadow-sm font-bold text-xs text-orange-800">📜 ListView</div>
+                                            {['Column', 'Row', 'ListView'].map((type) => <button key={type} onClick={() => addWidgetToTarget(type)} draggable onDragStart={(e) => handleDragStart(e, type)} className="cursor-pointer bg-blue-100 p-2 text-center rounded border border-blue-300 shadow-sm font-bold text-xs text-blue-800">+ {type}</button>)}
                                         </div>
                                     </div>
 
@@ -222,23 +487,15 @@
                                     <div className="mb-4">
                                         <h3 className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">📦 Single-Child Layout (child:)</h3>
                                         <div className="grid grid-cols-4 gap-2">
-                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Container')} className="cursor-grab bg-slate-100 p-2 text-center rounded border border-slate-300 shadow-sm font-bold text-xs">🔲 Container</div>
-                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Padding')} className="cursor-grab bg-purple-100 p-2 text-center rounded border border-purple-300 shadow-sm font-bold text-xs text-purple-800">📏 Padding</div>
-                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Center')} className="cursor-grab bg-teal-100 p-2 text-center rounded border border-teal-300 shadow-sm font-bold text-xs text-teal-800">🎯 Center</div>
-                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Card')} className="cursor-grab bg-white p-2 text-center rounded border border-gray-300 shadow-sm font-bold text-xs">💳 Card</div>
+                                            {['Container', 'Padding', 'Center', 'Card'].map((type) => <button key={type} onClick={() => addWidgetToTarget(type)} draggable onDragStart={(e) => handleDragStart(e, type)} className="cursor-pointer bg-slate-100 p-2 text-center rounded border border-slate-300 shadow-sm font-bold text-xs">+ {type}</button>)}
                                         </div>
                                     </div>
 
                                     {/* KATEGORI: LEAF UI */}
                                     <div className="mb-4">
                                         <h3 className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">🧩 Komponen Visual (Leaf / No child)</h3>
-                                        <div className="grid grid-cols-4 gap-2">
-                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Text')} className="cursor-grab bg-white p-2 text-center rounded border shadow-sm font-bold text-xs">📝 Text</div>
-                                            <div draggable onDragStart={(e) => handleDragStart(e, 'ElevatedButton')} className="cursor-grab bg-blue-600 text-white p-2 text-center rounded shadow-sm font-bold text-xs">🔘 Button</div>
-                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Icon')} className="cursor-grab bg-white p-2 text-center rounded border shadow-sm font-bold text-xs">★ Icon</div>
-                                            <div draggable onDragStart={(e) => handleDragStart(e, 'Image')} className="cursor-grab bg-white p-2 text-center rounded border shadow-sm font-bold text-xs">🖼️ Image</div>
-                                            <div draggable onDragStart={(e) => handleDragStart(e, 'TextField')} className="cursor-grab bg-white p-2 text-center rounded border shadow-sm font-bold text-xs">⌨️ TextField</div>
-                                            <div draggable onDragStart={(e) => handleDragStart(e, 'FlutterLogo')} className="cursor-grab bg-white p-2 text-center rounded border shadow-sm font-bold text-xs">🦋 Logo</div>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {['Text', 'ElevatedButton', 'Icon', 'Image', 'TextField', 'FlutterLogo'].map((type) => <button key={type} onClick={() => addWidgetToTarget(type)} draggable onDragStart={(e) => handleDragStart(e, type)} className="cursor-pointer bg-white p-2 text-center rounded border shadow-sm font-bold text-xs">+ {type}</button>)}
                                         </div>
                                     </div>
 
@@ -260,12 +517,170 @@
                                         <div className="ml-4">▼ body: </div>
                                         {renderTreeTextDnd('root', 1)}
                                     </div>
+                                    <div className="bg-slate-950 text-slate-100 rounded-lg mt-4 overflow-hidden">
+                                        <div className="flex justify-between items-center px-4 py-3 border-b border-white/10">
+                                            <span className="text-xs font-bold">Kode Flutter yang dihasilkan</span>
+                                            <button onClick={copyBuilderCode} className="text-xs px-3 py-1 rounded bg-blue-600 hover:bg-blue-500">Salin kode</button>
+                                        </div>
+                                        <pre className="text-xs p-4 overflow-x-auto whitespace-pre-wrap">{getBuilderCode()}</pre>
+                                    </div>
                                 </div>
                             )}
 
-                            {/* [KODE MODE BASIC & STATE TETAP SAMA] */}
-                            {activeMode === 'basic' && ( <div className="text-center mt-10 text-gray-500">Mode Basic Aktif. Ganti properti warna/judul.</div> )}
-                            {activeMode === 'state' && ( <div className="text-center mt-10 text-gray-500">Mode Teori State Aktif. Gunakan tombol trigger parent rebuild.</div> )}
+                            {activeMode === 'basic' && (
+                                <div className="space-y-5">
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                        <h2 className="font-bold text-blue-900">Pelajaran 1: Widget dan Hot Reload</h2>
+                                        <p className="text-sm text-blue-900 mt-1">Di Flutter, UI tersusun dari widget. Ubah judul atau warna draft, lalu tekan Terapkan untuk melihat perubahan seperti hot reload.</p>
+                                    </div>
+                                    <label className="block text-sm font-medium">Judul AppBar
+                                        <input value={draftTitle} onChange={(e) => setDraftTitle(e.target.value)} className="mt-1 w-full border rounded p-2" />
+                                    </label>
+                                    <label className="block text-sm font-medium">Warna tema
+                                        <select value={draftColor} onChange={(e) => setDraftColor(e.target.value)} className="mt-1 w-full border rounded p-2 bg-white">
+                                            <option value="bg-blue-600">Biru</option><option value="bg-emerald-600">Hijau</option><option value="bg-violet-600">Ungu</option><option value="bg-rose-600">Merah muda</option>
+                                        </select>
+                                    </label>
+                                    <button onClick={triggerHotReload} className="w-full rounded bg-blue-600 text-white font-bold p-2 hover:bg-blue-700">Terapkan perubahan (Hot Reload)</button>
+                                    <div className="bg-slate-50 border rounded-lg p-4 text-sm">
+                                        <h3 className="font-bold mb-2">Coba susun widget</h3>
+                                        <p className="text-gray-600 mb-3">Seret widget ke layar emulator, atau ketuk tombol untuk menambahkannya. Tombol counter di preview juga bisa ditekan.</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['Text', 'ElevatedButton', 'Icon'].map((type) => <button key={type} draggable onDragStart={(event) => handleBasicDragStart(event, type)} onClick={() => addWidgetBasic(type)} className="cursor-grab active:cursor-grabbing px-3 py-2 rounded border bg-white hover:bg-blue-50">⠿ {type}</button>)}
+                                            <button onClick={clearWidgetsBasic} className="px-3 py-2 rounded border text-red-600 bg-white hover:bg-red-50">Kosongkan</button>
+                                        </div>
+                                    </div>
+                                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-sm">
+                                        <h3 className="font-bold text-emerald-900">Jalankan sebagai aplikasi Flutter</h3>
+                                        <ol className="list-decimal ml-5 mt-2 space-y-1">
+                                            <li>Pasang Flutter SDK dan Android Studio, lalu jalankan <code>flutter doctor</code>.</li>
+                                            <li>Buat proyek: <code>flutter create aplikasi_pertama</code>.</li>
+                                            <li>Ganti isi <code>lib/main.dart</code> dengan kode latihan dan jalankan <code>flutter run</code>.</li>
+                                            <li>Untuk APK rilis: <code>flutter build apk --release</code>.</li>
+                                        </ol>
+                                        <p className="mt-2 text-xs text-emerald-900">Lab ini mensimulasikan UI; proses build nyata dilakukan dengan Flutter SDK di komputer.</p>
+                                    </div>
+                                    <div className="bg-slate-950 text-slate-100 rounded-lg overflow-hidden">
+                                        <div className="flex justify-between items-center px-4 py-3 border-b border-white/10">
+                                            <span className="text-xs font-bold">Contoh app counter (lib/main.dart)</span>
+                                            <button onClick={copyStarterCode} className="text-xs px-3 py-1 rounded bg-blue-600 hover:bg-blue-500">Salin kode</button>
+                                        </div>
+                                        <pre className="text-xs p-4 overflow-x-auto whitespace-pre">{getStarterCode()}</pre>
+                                    </div>
+                                </div>
+                            )}
+                            {activeMode === 'state' && (
+                                <div className="space-y-5">
+                                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                        <h2 className="font-bold text-purple-900">Pelajaran 3: Stateless dan Stateful</h2>
+                                        <p className="text-sm text-purple-900 mt-1"><code>StatelessWidget</code> tidak menyimpan state yang berubah sendiri; ia dapat dibangun ulang saat data dari parent berubah. <code>StatefulWidget</code> menyimpan state lokal dan memperbarui UI dengan <code>setState()</code>.</p>
+                                    </div>
+                                    <button onClick={forceParentRebuild} className="w-full rounded bg-purple-600 text-white font-bold p-3 hover:bg-purple-700">Ubah data parent & rebuild (nilai: {parentData})</button>
+                                    <div className={`p-4 rounded border-2 border-dashed border-red-300 bg-red-50 ${isStatelessFlashing ? 'flash-render-blue' : ''}`}>
+                                        <p className="text-xs font-bold text-red-700 uppercase">StatelessWidget — data dari parent</p>
+                                        <p className="mt-2">Nilai parent: <b>{parentData}</b></p>
+                                    </div>
+                                    <div className={`p-4 rounded border-2 border-dashed border-green-300 bg-green-50 ${isStatefulFlashing ? 'flash-render' : ''}`}>
+                                        <p className="text-xs font-bold text-green-700 uppercase">StatefulWidget — state lokal</p>
+                                        <p className="mt-2">Like: <b>{likesTheory}</b></p>
+                                        <button onClick={() => setLikesTheory(prev => prev + 1)} className="mt-2 rounded bg-pink-100 border border-pink-300 text-pink-700 px-3 py-1">❤️ Like (setState)</button>
+                                    </div>
+                                    <p className="text-xs text-gray-600">Tekan rebuild parent: nilai di Stateless ikut berubah dari properti, tetapi jumlah Like lokal tetap. Tekan Like: hanya state lokal yang bertambah.</p>
+                                </div>
+                            )}
+                            {activeMode === 'exam' && (
+                                <div className="space-y-5">
+                                    <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                                        <h2 className="font-bold text-indigo-900">Ujian pemahaman Flutter</h2>
+                                        <p className="text-sm text-indigo-900 mt-1">Masukkan NIS yang terdaftar. NIS diverifikasi di Google Sheets sebelum soal dibuka. Setiap pengiriman ujian dinilai oleh backend dan dicatat sebagai baris baru.</p>
+                                    </div>
+                                    <details className="bg-slate-50 border rounded-lg p-4">
+                                        <summary className="cursor-pointer font-bold text-sm">Pengaturan koneksi Google Sheets (pengajar)</summary>
+                                        <p className="text-xs text-gray-600 mt-3">Tempel URL web app dari Google Apps Script, lalu simpan. URL hanya disimpan di browser ini. Spreadsheet harus memiliki tab <code>Peserta</code> dengan header di baris pertama dan NIS di kolom A.</p>
+                                        <label className="block text-xs font-medium mt-3">URL web app Apps Script
+                                            <input value={examEndpointDraft} onChange={(event) => setExamEndpointDraft(event.target.value)} placeholder="https://script.google.com/macros/s/.../exec" className="mt-1 w-full border rounded p-2 text-sm" />
+                                        </label>
+                                        <button onClick={saveExamEndpoint} className="mt-2 rounded bg-slate-800 text-white px-3 py-2 text-xs font-bold hover:bg-slate-700">Simpan koneksi</button>
+                                        <ol className="list-decimal ml-5 mt-3 space-y-1 text-xs text-gray-600">
+                                            <li>Di Google Sheets, pastikan tab <code>Peserta</code> memiliki header di baris pertama dan daftar NIS berformat teks di kolom A.</li>
+                                            <li>Pilih <b>Ekstensi → Apps Script</b>, ganti isi editor dengan kode di <code>GoogleAppsScript.gs</code>, lalu simpan.</li>
+                                            <li>Pilih <b>Deploy → New deployment → Web app</b>; jalankan sebagai pemilik spreadsheet dan atur akses agar peserta dapat membuka ujian.</li>
+                                            <li>Salin URL web app berakhiran <code>/exec</code> ke kolom di atas. Tab <code>Hasil_Ujian</code> dibuat otomatis saat percobaan pertama disimpan.</li>
+                                        </ol>
+                                    </details>
+
+                                    {examStatus === 'locked' && (
+                                        <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-4 text-center text-sm text-indigo-900">
+                                            Form NIS akan muncul saat tombol <b>Mulai Ujian</b> di bagian atas ditekan.
+                                        </div>
+                                    )}
+
+                                    {examDialogOpen && examStatus === 'locked' && (
+                                        <div
+                                            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm"
+                                            onMouseDown={(event) => { if (event.target === event.currentTarget && !examLoading) setExamDialogOpen(false); }}
+                                        >
+                                            <div role="dialog" aria-modal="true" aria-labelledby="exam-nis-title" className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+                                                <div className="mb-5 flex items-start justify-between gap-4">
+                                                    <div>
+                                                        <h3 id="exam-nis-title" className="text-xl font-bold text-slate-900">Verifikasi peserta</h3>
+                                                        <p className="mt-1 text-sm text-slate-600">Masukkan NIS untuk memulai ujian.</p>
+                                                    </div>
+                                                    <button type="button" aria-label="Tutup" disabled={examLoading} onClick={() => setExamDialogOpen(false)} className="rounded-lg px-3 py-1 text-2xl leading-none text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50">×</button>
+                                                </div>
+                                                <form onSubmit={startExam} className="space-y-4">
+                                                    <label className="block text-sm font-semibold text-slate-700">Nomor Induk Siswa (NIS)
+                                                        <input autoFocus value={examNis} onChange={(event) => { setExamNis(event.target.value); setExamError(''); }} required autoComplete="off" className="mt-2 w-full rounded-xl border border-slate-300 p-3 text-base outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="Contoh: 12345678" />
+                                                    </label>
+                                                    {examError && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{examError}</p>}
+                                                    <div className="flex gap-3 pt-1">
+                                                        <button type="button" disabled={examLoading} onClick={() => setExamDialogOpen(false)} className="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">Batal</button>
+                                                        <button type="submit" disabled={examLoading} className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 font-bold text-white shadow-md shadow-indigo-200 hover:bg-indigo-700 disabled:opacity-60">
+                                                            {examLoading ? 'Memeriksa...' : 'Verifikasi & Mulai'}
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {examStatus === 'inProgress' && (
+                                        <div className="space-y-4">
+                                            <div className="flex items-center justify-between bg-white border rounded-lg p-3 text-sm">
+                                                <span>Peserta: <b>{examNis}</b></span>
+                                                <span>{Object.keys(examAnswers).length}/{examQuestions.length} dijawab</span>
+                                            </div>
+                                            {examQuestions.map((question, index) => (
+                                                <fieldset key={question.id} className="bg-white border rounded-lg p-4">
+                                                    <legend className="font-bold text-sm px-1">{index + 1}. {question.question}</legend>
+                                                    <div className="space-y-2 mt-2">
+                                                        {question.options.map((option) => (
+                                                            <label key={option.id} className="flex items-start gap-2 rounded p-2 hover:bg-indigo-50 cursor-pointer">
+                                                                <input type="radio" name={`question-${question.id}`} value={option.id} checked={examAnswers[question.id] === option.id} onChange={() => setExamAnswers(prev => ({ ...prev, [question.id]: option.id }))} className="mt-1" />
+                                                                <span className="text-sm">{option.text}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                </fieldset>
+                                            ))}
+                                            <button onClick={submitExam} disabled={examLoading} className="w-full rounded bg-emerald-600 text-white font-bold p-3 hover:bg-emerald-700 disabled:opacity-60">
+                                                {examLoading ? 'Mengirim dan menyimpan hasil...' : 'Kumpulkan ujian'}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {examStatus === 'completed' && examResult && (
+                                        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-5 text-center">
+                                            <h3 className="font-bold text-emerald-900 text-lg">Ujian berhasil disimpan</h3>
+                                            <p className="text-4xl font-bold text-emerald-700 my-3">{examResult.score}%</p>
+                                            <p className="text-sm text-emerald-900">{examResult.correct} dari {examResult.total} jawaban benar</p>
+                                            <p className="text-xs text-emerald-800 mt-2">Nomor percobaan: {examResult.attemptNumber} · NIS: {examNis}</p>
+                                            <button onClick={resetExam} className="mt-4 rounded border border-emerald-700 px-4 py-2 text-sm font-bold text-emerald-800 hover:bg-emerald-100">Kembali</button>
+                                        </div>
+                                    )}
+                                    <p className="text-xs text-gray-500">Catatan: NIS berfungsi sebagai pemeriksaan kelayakan, bukan autentikasi identitas yang kuat. Batasi akses spreadsheet hanya untuk pengelola.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -280,7 +695,25 @@
 
                             <div className="flex-1 bg-white overflow-y-auto relative">
                                 {activeMode === 'dnd' && <div className="h-full">{renderNode({id: 'root', type: 'ScaffoldBody'})}</div>}
-                                {activeMode !== 'dnd' && <div className="p-4 text-center text-gray-400 text-sm mt-10">Pindah ke tab Advanced Builder untuk simulasi UI lengkap.</div>}
+                                {activeMode === 'basic' && (
+                                    <div
+                                        className={`p-5 text-center h-full transition-colors ${basicDragOver ? 'drop-active' : ''}`}
+                                        onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = 'copy'; setBasicDragOver(true); }}
+                                        onDragLeave={() => setBasicDragOver(false)}
+                                        onDrop={handleBasicDrop}
+                                    >
+                                        <p className="text-gray-500 text-sm mb-2">Tombol ditekan sebanyak:</p>
+                                        <p className="text-4xl font-bold text-slate-800 mb-4">{basicCount}</p>
+                                        <button onClick={() => setBasicCount(prev => prev + 1)} className="bg-blue-600 text-white rounded-lg px-5 py-2 shadow">Tambah</button>
+                                        {widgetsBasic.map((widget, index) => <div key={widget.id} className="mt-4">
+                                            {widget.type === 'Text' && <p className="font-medium">Widget Text #{index + 1}</p>}
+                                            {widget.type === 'ElevatedButton' && <button onClick={() => setBasicCount(prev => prev + 1)} className="mt-2 bg-slate-200 rounded px-3 py-1">Tombol tambahan</button>}
+                                            {widget.type === 'Icon' && <div className="text-3xl text-blue-500">★</div>}
+                                        </div>)}
+                                    </div>
+                                )}
+                                {activeMode === 'state' && <div className="p-5 text-center text-gray-500 text-sm mt-10">Amati nilai parent dan state lokal pada panel pelajaran.</div>}
+                                {activeMode === 'exam' && <div className="p-5 text-center text-gray-500 text-sm mt-10">Ujian pemahaman dikerjakan pada panel pelajaran.</div>}
                             </div>
                             
                             <div className="w-1/3 h-1 bg-gray-300 rounded-full mx-auto my-2"></div>
